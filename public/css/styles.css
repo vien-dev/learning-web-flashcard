@@ -17,12 +17,22 @@ body {
 }
 
 .flashcard {
-	background-color: yellow;
+	background-color: rgb(159, 159, 67);
 }
 
 .flashcard .flashcard-word{
 	font-weight: bold;
 	font-size: larger;
+}
+
+.flashcard-current {
+	width: 20%;
+	margin: auto;
+	margin-bottom: 3%;
+}
+.flashcard-current .flashcard-word {
+	margin: 25%;
+	font-size: xx-large;
 }
 
 footer {
