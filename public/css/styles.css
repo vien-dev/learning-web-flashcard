@@ -26,6 +26,13 @@ body {
 	padding-right: 15%;
 }
 
+.search .btn {
+	border-top-left-radius: 0%;
+	border-bottom-left-radius: 0%;
+	border-top-right-radius: 20%;
+	border-bottom-right-radius: 20%;
+}
+
 .flashcard {
 	background-color: rgb(159, 159, 67);
 }
