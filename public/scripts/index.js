@@ -7,14 +7,55 @@ function queryWord(wordInConcern) {
 }
 
 function showFlashCard(flashCard) {
-    $(".flashcard-current.flashcard-front .flashcard-word").text(flashCard.word);
-    $(".flashcard-current.flashcard-back p:first-child").text(`Meaning: ${flashCard.definition}`);
-    $(".flashcard-current.flashcard-back p:last-child").text(`Example: ${flashCard.example}`);
+    if (!jQuery.isEmptyObject(flashCard)) {
+        $(".customized-navbar").removeClass("large-bottom-margin");
+        $(".customized-navbar").addClass("normal-bottom-margin");
 
-    $(".flashcard-current.flashcard-front").removeClass("d-none");
-    $(".flashcard-current.flashcard-back").addClass("d-none");
+        if (flashCard.wordType != '') {
+            $(".flashcard-current.flashcard-front .flashcard-word").text(`${flashCard.word} (${flashCard.wordType})`);
+        } else {
+            $(".flashcard-current.flashcard-front .flashcard-word").text(`${flashCard.word}`);
+        }
+        let extraInfoHtlmString = flashCard.extraInfo.reduce(function(finalString, info, idx, arr) {
+            console.log(`final string: ${finalString}`);
+            if (0 === idx) {
+                finalString += '<p class="flashcard flashcard-current flashcard-front flashcard-extra-info">Extra info: ';
+            } else {
+                finalString += '<br/>';
+            }
 
-    $(".search > input").val("");
+            finalString += `${info}`;
+
+            if (arr.len === idx+1) {
+                finalString += '</p>';
+            }
+
+            return finalString;
+        }, '');
+        $(".flashcard-current.flashcard-front .flashcard-extra-info").remove();
+        if (extraInfoHtlmString != '') {
+            $(".flashcard-current.flashcard-front .flashcard-word").after(extraInfoHtlmString);
+        }
+
+        $(".flashcard-current.flashcard-back p:first-child").text(`Meaning: ${flashCard.definition}`);
+        $(".flashcard-current.flashcard-back p:first-child+p").text(`Example: ${flashCard.example}`);
+
+        $(".current-word-container.view-only").removeClass("d-none");
+        $(".flashcard-current.flashcard-front").removeClass("d-none");
+        $(".flashcard-current.flashcard-back").addClass("d-none");
+
+        $(".search > input").val("");
+        $(".search").removeClass("medium-bottom-margin");
+        $(".search").addClass("normal-bottom-margin");
+    } else {
+        $(".customized-navbar").removeClass("normal-bottom-margin");
+        $(".customized-navbar").addClass("large-bottom-margin");
+
+        $(".current-word-container.view-only").addClass("d-none");
+
+        $(".search").removeClass("normal-bottom-margin");
+        $(".search").addClass("medium-bottom-margin");
+    }
 }
 $(".flashcard-current.flashcard-front").click(function() {
     this.classList.toggle("d-none");

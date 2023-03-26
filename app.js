@@ -11,22 +11,38 @@ app.use(express.static("public"));
 let topPickFlashCards = [
     { word:'hej',
       category: '',
+      wordType: '',
+      extraInfo: [],
       definition: 'A way to say hi',
       example: 'Hej! hur mår du?'},
     { word: 'hej då',
       category: '',
+      wordType: '',
+      extraInfo: [],
       definition: 'Goodbye!',
       example: 'hej då! vi ses i morgon!'},
+    { word:'nej',
+      category: '',
+      wordType: '',
+      extraInfo: [],
+      definition: 'A way to say no',
+      example: 'Nej! Jag vill inte äta dem.'},
     { word: 'titta',
       category: '',
+      wordType: 'verb',
+      extraInfo: ['tittade, tittat, titta, tittar'],
       definition: 'Look!',
-      example: 'Titta! Bakom dig! (look! behind you!'},
+      example: 'Titta! Bakom dig! (look! behind you!)'},
     { word: 'sitta',
       category: '',
+      wordType: 'verb',
+      extraInfo: ['satt, suttit, sitt, sitta, sitter'],
       definition: 'Sit!',
-      example: 'Sitta här! (sit down here!'},
+      example: 'Sitta här! (sit down here!)'},
     { word:'äpple',
       category: '',
+      wordType: 'noun',
+      extraInfo: ['ett', 'äpplet, äpplen, äpplena'],
       definition: 'Apple',
       example: 'Titta! ett äpple!'}];
 
@@ -46,7 +62,7 @@ app.get("/ajax", function(req, res) {
   if (foundedWord != null) {
     res.json(foundedWord);
   } else {
-    res.status(404).json('word not found'); //not found
+    res.json({}); //not found
   }
 })
 

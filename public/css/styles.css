@@ -7,13 +7,23 @@ body {
 	background-color: #e3f2fd;
 	padding-left: 2%;
 	padding-right: 2%;
+}
+
+.large-bottom-margin {
+	margin-bottom: 15%;
+}
+
+.medium-bottom-margin {
+	margin-bottom: 5%;
+}
+
+.normal-bottom-margin {
 	margin-bottom: 3%;
 }
 
 .search {
 	padding-left: 15%;
 	padding-right: 15%;
-	margin-bottom: 4%;
 }
 
 .flashcard {
@@ -25,22 +35,22 @@ body {
 	font-size: larger;
 }
 
-.flashcard-current {
-	width: 20%;
-	margin: auto;
-	margin-bottom: 3%;
-}
 .flashcard-current .flashcard-word {
-	margin: 25%;
 	font-size: xx-large;
+}
+
+.view-only {
+	width: 40%;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 footer {
 	text-align: center;
-	position: absolute;
-	bottom: 0;
 	width: 100%;
 	background-color: #19A7CE;
+	position:fixed;
+	bottom: 0;
 }
 
 footer p {

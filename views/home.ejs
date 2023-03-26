@@ -1,26 +1,44 @@
 <%- include("partials/header"); -%>  
-<div class="input-group search">
+<div class="input-group search medium-bottom-margin">
     <input class="form-control border-end-0 border rounded-pill" type="text" placeholder="Search for a word">
     <span class="input-group-append">
         <button class="btn btn-outline-secondary bg-white border-start-0 border rounded-pill ms-n3" type="button">
-            <i class="fa fa-search"></i>
+            <i class="bi bi-search"></i>
         </button>
     </span>
 </div>
 
-<div class="card flashcard flashcard-current flashcard-front d-none">
-    <div class="card-body">
-        <p class="flashcard-word"></p>
+<div class="current-word-container view-only normal-bottom-margin d-none">
+    <div class="card flashcard flashcard-current flashcard-front d-none">
+        <div class="card-body">
+            <p class="flashcard-word"></p>
+        </div>
     </div>
-</div>
-<div class="card flashcard flashcard-current flashcard-back d-none">
-    <div class="card-body">
-        <p class="card-text">Meaning: </p>
-        <p class="card-text">Example: </p>
+    <div class="card flashcard flashcard-current flashcard-back d-none">
+        
+        <div class="card-body container-fluid">
+            <div class="row">
+                <div class="col-md-3">
+                    <img src="/images/flashcard_placeholder.png" alt="Image depicts the example sentence">
+                </div>
+                <div class="col-md-9">
+                    <p class="card-text text-start">Meaning: </p>
+                    <p class="card-text text-start">Example: </p>
+                </div>
+            </div>
+            <div class="row justify-content-end">
+                <button class="btn btn-outline-secondary bg-none border-0 col-1" type="button">
+                    <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn btn-outline-secondary bg-none border-0 col-1" type="button">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
-<div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
+<div id="carouselExampleControls" class="carousel slide medium-bottom-margin" data-bs-ride="carousel" data-bs-interval="4000">
     <div class="carousel-inner" role="listbox">
         <div class="container">
             <% homeEJSTopPickFlashCards.forEach(function(flashCard, idx, arr) { %>
@@ -55,4 +73,5 @@
         <span class="visually-hidden">Next</span>
     </button>
 </div>
+
 <%- include("partials/footer"); -%>  
