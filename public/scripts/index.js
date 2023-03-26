@@ -153,12 +153,6 @@ function editModeAddExtraInfo(extraInfo) {
 
 $("#btnAddExtraInfo").click(function() {editModeAddExtraInfo("")});
 
-$("#btnCancelEdit").click(function() {
-    if (checkAndLeaveEditMode()) {
-        exitEditMode();
-    }
-});
-
 $("#btnEditWord").click(function() {
     enterEditMode(currentFlashCard);
 });
