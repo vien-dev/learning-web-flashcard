@@ -4,7 +4,26 @@ let isEditing = false;
 function queryWord(filter) {
     fetch('/ajax/flashcard?' + new URLSearchParams(filter))
     .then(response => response.json())
-    .then(data => showFlashCardUI(data))
+    .then(function(queriedFlashCardData) {
+        showFlashCardUI(queriedFlashCardData)
+    })
+}
+
+function queryDynamicContentFromOpenAI() {
+    const filter = {
+        word: currentFlashCard.word,
+        wordType: currentFlashCard.wordType
+    };
+
+    fetch('/ajax/dynamic-content-from-openai?' + new URLSearchParams(filter))
+    .then(response => response.json())
+    .then(queriedOpenAIDynamicContent => updateFlashCardDynamicContentFromOpenAI(queriedOpenAIDynamicContent))
+}
+
+function updateFlashCardDynamicContentFromOpenAI(dynamicContentFromOpenAI) {
+    if (dynamicContentFromOpenAI.flashCardImage != "") {
+        $(".flashcard-image").attr("src", dynamicContentFromOpenAI.flashCardImage);
+    }
 }
 
 function showFlashCardUI(flashCard) {
@@ -38,6 +57,7 @@ function showFlashCardUI(flashCard) {
             $(".flashcard-current.flashcard-front .card-text").after(extraInfoHtlmString);
         }
 
+        $(".flashcard-image").attr("src", "/images/flashcard_placeholder.png");
         $(".flashcard-current.flashcard-back p:first-child").text(`Definition: ${flashCard.definition}`);
         $(".flashcard-current.flashcard-back p:first-child+p").text(`Example: ${flashCard.example}`);
 
@@ -48,6 +68,8 @@ function showFlashCardUI(flashCard) {
         $(".search > input").val("");
         $(".search").removeClass("medium-bottom-margin");
         $(".search").addClass("normal-bottom-margin");
+
+        queryDynamicContentFromOpenAI();
     } else {
         currentFlashCard = {};
         enterEditMode(currentFlashCard);
@@ -170,7 +192,6 @@ $("#btnSubmitEditWord").click(function() {
     const categoryInEdit = $("#inputCategoryInEdit").val();
     const wordTypeInEdit = $("#inputWordTypeInEdit").val();
     const extraInfoInEdit = $(".extra-info input").map(function() {return this.value;}).get();
-    console.log(extraInfoInEdit);
     const definitionInEdit = $("#inputDefinitionInEdit").val();
     const exampleInEdit = $("#inputExampleInEdit").val();
 
@@ -305,12 +326,10 @@ $(".carousel-item .flashcard").each(function() {
     this.addEventListener("click", function() {
         let clickedWord = $(this).find(".flashcard-word").text();
         let clickedWordType = $(this).find(".flashcard-word-type").text();
-        console.log(clickedWordType);
         const filter = {
             word: clickedWord,
             wordType: clickedWordType
         }
-        console.log(filter);
 
         if (checkAndLeaveEditMode()) {
             queryWord(filter);

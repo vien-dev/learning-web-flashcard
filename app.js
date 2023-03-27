@@ -106,6 +106,70 @@ app.delete("/ajax/flashcard", bodyParser.json({type: 'application/json'}), funct
   }
 });
 
+app.get("/ajax/dynamic-content-from-openai", function(req, res) {
+  let wordInConcern = req.query.word;
+  let wordTypeInConcern = req.query.wordType;
+  const openAIAPIKey = process.env.OPENAI_API_KEY;
+
+  let foundedWord = topPickFlashCards.find(function(flashCard) {
+    return flashCard.word === wordInConcern && flashCard.wordType === wordTypeInConcern;
+  });
+
+  let responseJSON = {
+    flashCardImage: ""
+  }
+  if (foundedWord != null) {
+    fetch("https://api.openai.com/v1/images/generations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${openAIAPIKey}`
+      },
+      body: JSON.stringify({
+        prompt: `${foundedWord.example}`,
+        n: 1,
+        size: "256x256",
+        response_format: "url"
+      })
+    })
+    .then(openAIResponse => openAIResponse.json())
+    .then(function(openAIJSONData) {
+      responseJSON.flashCardImage = openAIJSONData.data[0].url;
+      res.json(responseJSON);
+    })
+    .catch(function() {
+      console.log("Getting error when fetching from OpenAI.");
+      fetch("https://api.openai.com/v1/images/generations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${openAIAPIKey}`
+        },
+        body: JSON.stringify({
+          prompt: `${foundedWord.definition}`,
+          n: 1,
+          size: "256x256",
+          response_format: "url"
+        })
+      })
+      .then(openAIResponse => openAIResponse.json())
+      .then(function(openAIJSONData) {
+        responseJSON.flashCardImage = openAIJSONData.data[0].url;
+        res.json(responseJSON);
+      })
+      .catch(function(error) {
+        if (error.response) {
+          console.log(error.response.status);
+          console.log(error.response.data);
+        } else {
+          console.log(error.message);
+        }
+        res.json(responseJSON);
+      })
+    });
+  }
+});
+
 app.get("/about", function(req, res) {
     res.render("about");
 });
