@@ -14,9 +14,9 @@ function showFlashCardUI(flashCard) {
         $(".customized-navbar").addClass("normal-bottom-margin");
 
         if (flashCard.wordType != '') {
-            $(".flashcard-current.flashcard-front .flashcard-word").text(`${flashCard.word} (${flashCard.wordType})`);
+            $(".flashcard-current.flashcard-front .card-text").html(`<span class="flashcard-word">${flashCard.word}</span> (<span class="flashcard-word-type">${flashCard.wordType}</span>)`);
         } else {
-            $(".flashcard-current.flashcard-front .flashcard-word").text(`${flashCard.word}`);
+            $(".flashcard-current.flashcard-front .card-text").html(`<span class="flashcard-word">${flashCard.word}</span>`);
         }
         let extraInfoHtlmString = flashCard.extraInfo.reduce(function(finalString, info, idx, arr) {
             if (0 === idx) {
@@ -35,7 +35,7 @@ function showFlashCardUI(flashCard) {
         }, '');
         $(".flashcard-current.flashcard-front .flashcard-extra-info").remove();
         if (extraInfoHtlmString != '') {
-            $(".flashcard-current.flashcard-front .flashcard-word").after(extraInfoHtlmString);
+            $(".flashcard-current.flashcard-front .card-text").after(extraInfoHtlmString);
         }
 
         $(".flashcard-current.flashcard-back p:first-child").text(`Definition: ${flashCard.definition}`);
@@ -265,9 +265,13 @@ $(".search button").click(function() {
 $(".carousel-item .flashcard").each(function() {
     this.addEventListener("click", function() {
         let clickedWord = $(this).find(".flashcard-word").text();
+        let clickedWordType = $(this).find(".flashcard-word-type").text();
+        console.log(clickedWordType);
         const filter = {
-            word: clickedWord
+            word: clickedWord,
+            wordType: clickedWordType
         }
+        console.log(filter);
 
         if (checkAndLeaveEditMode()) {
             queryWord(filter);

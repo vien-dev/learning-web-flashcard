@@ -48,7 +48,7 @@ let topPickFlashCards = [
 
 app.get("/", function(req, res) {
     res.render("home", {
-        homeEJSTopPickFlashCards: topPickFlashCards.map(flashCard => flashCard.word)
+        homeEJSTopPickFlashCards: topPickFlashCards
     });
 })
 

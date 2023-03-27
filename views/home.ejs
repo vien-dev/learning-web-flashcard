@@ -11,7 +11,7 @@
 <div class="current-word-container view-only normal-bottom-margin d-none">
     <div class="card flashcard flashcard-current flashcard-front d-none">
         <div class="card-body">
-            <p class="flashcard-word"></p>
+            <p class="card-text"></p>
         </div>
     </div>
     <div class="card flashcard flashcard-current flashcard-back d-none"> 
@@ -104,7 +104,11 @@
                                 <div class="col-md-4">
                                     <div class="card flashcard">
                                         <div class="card-body">
-                                            <p class="flashcard-word"><%= flashCard %></p>
+                                            <% if (flashCard.wordType != '') { %>
+                                            <p><span class="flashcard-word"><%= flashCard.word %></span> (<span class="flashcard-word-type"><%= flashCard.wordType %></span>)</p>
+                                            <% } else { %>
+                                            <p><span class="flashcard-word"><%= flashCard.word %></span></p>
+                                            <% } %>
                                         </div>
                                     </div>
                                 </div>
