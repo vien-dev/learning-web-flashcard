@@ -52,7 +52,7 @@ app.get("/", function(req, res) {
     });
 })
 
-app.get("/ajax", function(req, res) {
+app.get("/ajax/flash-card", function(req, res) {
   let wordInConcern = req.query.word;
 
   let foundedWord = topPickFlashCards.find(function(flashCard) {
@@ -64,7 +64,32 @@ app.get("/ajax", function(req, res) {
   } else {
     res.json({}); //not found
   }
-})
+});
+
+app.post("/ajax/flash-card", bodyParser.json({type: 'application/json'}), function(req, res) {
+  const flashCardInEdit = req.body;
+
+  topPickFlashCards.push(flashCardInEdit.flashCard);
+
+  res.json({status: "ok"});
+  //res.json({status: "nok", error: "simply nok"});
+});
+
+app.put("/ajax/flash-card", bodyParser.json({type: 'application/json'}), function(req, res) {
+  const flashCardInEdit = req.body;
+
+  const foundIdx = topPickFlashCards.findIndex(function(flashCard) {
+    return (flashCard.word === flashCardInEdit.filter.word &&
+        flashCard.wordType === flashCardInEdit.filter.wordType);
+  });
+
+  if (foundIdx != -1) {
+    topPickFlashCards[foundIdx] = flashCardInEdit.flashCard;
+  }
+
+  res.json({status: "ok"});
+  //res.json({status: "nok", error: "simply nok"});
+});
 
 app.get("/about", function(req, res) {
     res.render("about");

@@ -1,15 +1,13 @@
 let currentFlashCard = {};
 let isEditing = false;
 
-function queryWord(wordInConcern) {
-    fetch('/ajax?' + new URLSearchParams({
-        word: wordInConcern
-    }))
+function queryWord(filter) {
+    fetch('/ajax/flash-card?' + new URLSearchParams(filter))
     .then(response => response.json())
-    .then(data => showFlashCard(data))
+    .then(data => showFlashCardUI(data))
 }
 
-function showFlashCard(flashCard) {
+function showFlashCardUI(flashCard) {
     if (!jQuery.isEmptyObject(flashCard)) {
         currentFlashCard = flashCard;
         $(".customized-navbar").removeClass("large-bottom-margin");
@@ -21,9 +19,8 @@ function showFlashCard(flashCard) {
             $(".flashcard-current.flashcard-front .flashcard-word").text(`${flashCard.word}`);
         }
         let extraInfoHtlmString = flashCard.extraInfo.reduce(function(finalString, info, idx, arr) {
-            console.log(`final string: ${finalString}`);
             if (0 === idx) {
-                finalString += '<p class="flashcard flashcard-current flashcard-front flashcard-extra-info">Extra info: ';
+                finalString += '<p class="flashcard flashcard-extra-info">Extra info: ';
             } else {
                 finalString += '<br/>';
             }
@@ -157,41 +154,116 @@ $("#btnEditWord").click(function() {
     enterEditMode(currentFlashCard);
 });
 
+$("#btnSubmitEditWord").click(function() {
+    const wordInEdit = $("#inputWordInEdit").val();
+    const categoryInEdit = $("#inputCategoryInEdit").val();
+    const wordTypeInEdit = $("#inputWordTypeInEdit").val();
+    const extraInfoInEdit = $(".extra-info input").map(function() {return this.value;}).get();
+    console.log(extraInfoInEdit);
+    const definitionInEdit = $("#inputDefinitionInEdit").val();
+    const exampleInEdit = $("#inputExampleInEdit").val();
+
+    if ('' === wordInEdit) {
+        alert("The word cannot be empty");
+        return;
+    }
+    if ('' === definitionInEdit) {
+        alert("The word's definition cannot be empty");
+        return;
+    }
+    if ('' === exampleInEdit) {
+        alert("The word's example cannot be empty");
+        return;
+    }
+
+    let methodInUse="POST";
+    let filterInUse={};
+    if (!jQuery.isEmptyObject(currentFlashCard)) {
+        methodInUse="PUT";
+        filterInUse={
+            word: jQuery.isEmptyObject(currentFlashCard)?'':currentFlashCard.word,
+            wordType: jQuery.isEmptyObject(currentFlashCard)?'':currentFlashCard.wordType
+        }
+    }
+    const flashCardInEdit = {
+        filter: filterInUse,
+        flashCard: {
+            word: wordInEdit,
+            category: categoryInEdit,
+            wordType: wordTypeInEdit,
+            extraInfo: extraInfoInEdit,
+            definition: definitionInEdit,
+            example: exampleInEdit
+        }
+    }
+
+    fetch("/ajax/flash-card", {
+        method: methodInUse,
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(flashCardInEdit),
+    })
+    .then(response => response.json())
+    .then(function(data) {
+        if (data.status === "nok") {
+            alert(`Cannot submit changes to server due to error: ${data.error}`);
+        } else if (data.status === "ok") {
+            const filter = {
+                word: wordInEdit,
+                wordType: wordTypeInEdit
+            }
+            exitEditMode();
+            queryWord(filter);
+        } else {
+            console.log(`unknown status string ${data.status} from server`);
+        }
+    });
+});
+
 $(".flashcard-current.flashcard-front").click(function(e) {
     this.classList.toggle("d-none");
     $(".flashcard-current.flashcard-back").toggleClass("d-none");
 });
 
 $(".flashcard-current.flashcard-back").click(function(e) {
-    console.log(e);
     this.classList.toggle("d-none");
     $(".flashcard-current.flashcard-front").toggleClass("d-none");
 });
 
 $(".search input").keypress(function(e) {
     if (e.key === "Enter") {
-        let searchedWord = $(".search > input").val();
+        const searchedWord = $(".search > input").val();
+        const filter = {
+            word: searchedWord
+        }
 
         if (checkAndLeaveEditMode()) {
-            queryWord(searchedWord);
+            queryWord(filter);
         }
     }
 })
 
 $(".search button").click(function() {
     let searchedWord = $(".search > input").val();
+    const filter = {
+        word: searchedWord
+    }
 
     if (checkAndLeaveEditMode()) {
-        queryWord(searchedWord);
+        queryWord(filter);
     }
 });
 
 $(".carousel-item .flashcard").each(function() {
     this.addEventListener("click", function() {
         let clickedWord = $(this).find(".flashcard-word").text();
+        const filter = {
+            word: clickedWord
+        }
 
         if (checkAndLeaveEditMode()) {
-            queryWord(clickedWord);
+            queryWord(filter);
         }
     })
 });
