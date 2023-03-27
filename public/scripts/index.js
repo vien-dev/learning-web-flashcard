@@ -82,23 +82,30 @@ function checkAndLeaveEditMode() {
     return retVal;
 }
 
-function exitEditMode() {
-    isEditing = false;
-
+function resetEditModeUI() {
     $("#inputWordInEdit").val("");
     $("#inputCategoryInEdit").val("");
     $("#inputWordTypeInEdit").val("");
     $(".extra-info").remove();
     $("#inputDefinitionInEdit").val("");
     $("#inputExampleInEdit").val("");
+}
+
+function exitEditMode() {
+    isEditing = false;
+
+    resetEditModeUI();
 
     showStartScreen();
 }
 
 function enterEditMode(flashCard) {
     isEditing = true;
+
     $(".current-word-container.view-only").addClass("d-none");
     $(".current-word-container.edit").removeClass("d-none");
+
+    resetEditModeUI();
 
     if (!jQuery.isEmptyObject(flashCard)) {
         $("#inputWordInEdit").val(flashCard.word);
