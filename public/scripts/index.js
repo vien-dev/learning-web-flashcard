@@ -2,7 +2,7 @@ let currentFlashCard = {};
 let isEditing = false;
 
 function queryWord(filter) {
-    fetch('/ajax/flash-card?' + new URLSearchParams(filter))
+    fetch('/ajax/flashcard?' + new URLSearchParams(filter))
     .then(response => response.json())
     .then(data => showFlashCardUI(data))
 }
@@ -116,6 +116,10 @@ function enterEditMode(flashCard) {
         });
         $("#inputDefinitionInEdit").val(flashCard.definition);
         $("#inputExampleInEdit").val(flashCard.example);
+
+        $("#btnRemoveWord").removeClass("d-none");
+    } else {
+        $("#btnRemoveWord").addClass("d-none");
     }
 }
 
@@ -204,7 +208,7 @@ $("#btnSubmitEditWord").click(function() {
         }
     }
 
-    fetch("/ajax/flash-card", {
+    fetch("/ajax/flashcard", {
         method: methodInUse,
         headers: {
             "Content-Type": "application/json",
@@ -227,6 +231,41 @@ $("#btnSubmitEditWord").click(function() {
         }
     });
 });
+
+$("#btnRemoveWord").click(function() {
+    //if current flashcard? -> remove card with filter word + wordType
+    //use delete method
+    //if server response is ok exit edit mode.
+    //else. Stay
+    if (!jQuery.isEmptyObject(currentFlashCard)) {
+        const wordInConcern = currentFlashCard.word;
+        const wordTypeInConcern = currentFlashCard.wordType;
+        const methodInUse = "DELETE";
+        const filter = {
+            word: wordInConcern,
+            wordType: wordTypeInConcern
+        }
+
+        fetch("/ajax/flashcard", {
+            method: methodInUse,
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(filter),
+        })
+        .then(response => response.json())
+        .then(function(data) {
+            if (data.status === "nok") {
+                alert(`Cannot delete flash card due to error: ${data.error}`);
+            } else if (data.status === "ok") {
+                alert(`Flashcard is now deleted!`);
+                exitEditMode();
+            } else {
+                console.log(`unknown status string ${data.status} from server`);
+            }
+        });
+    }
+})
 
 $(".flashcard-current.flashcard-front").click(function(e) {
     this.classList.toggle("d-none");

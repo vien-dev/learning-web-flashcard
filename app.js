@@ -52,7 +52,7 @@ app.get("/", function(req, res) {
     });
 })
 
-app.get("/ajax/flash-card", function(req, res) {
+app.get("/ajax/flashcard", function(req, res) {
   let wordInConcern = req.query.word;
 
   let foundedWord = topPickFlashCards.find(function(flashCard) {
@@ -66,7 +66,7 @@ app.get("/ajax/flash-card", function(req, res) {
   }
 });
 
-app.post("/ajax/flash-card", bodyParser.json({type: 'application/json'}), function(req, res) {
+app.post("/ajax/flashcard", bodyParser.json({type: 'application/json'}), function(req, res) {
   const flashCardInEdit = req.body;
 
   topPickFlashCards.push(flashCardInEdit.flashCard);
@@ -75,7 +75,7 @@ app.post("/ajax/flash-card", bodyParser.json({type: 'application/json'}), functi
   //res.json({status: "nok", error: "simply nok"});
 });
 
-app.put("/ajax/flash-card", bodyParser.json({type: 'application/json'}), function(req, res) {
+app.put("/ajax/flashcard", bodyParser.json({type: 'application/json'}), function(req, res) {
   const flashCardInEdit = req.body;
 
   const foundIdx = topPickFlashCards.findIndex(function(flashCard) {
@@ -89,6 +89,21 @@ app.put("/ajax/flash-card", bodyParser.json({type: 'application/json'}), functio
 
   res.json({status: "ok"});
   //res.json({status: "nok", error: "simply nok"});
+});
+
+app.delete("/ajax/flashcard", bodyParser.json({type: 'application/json'}), function(req, res) {
+  const filter = req.body;
+
+  const foundIdx = topPickFlashCards.findIndex(function(flashCard) {
+    return (flashCard.word === filter.word && flashCard.wordType === filter.wordType);
+  });
+
+  if (foundIdx != -1) {
+    topPickFlashCards.splice(foundIdx, 1);
+    res.json({status: "ok"});
+  } else {
+    res.json({status: "nok", error: `no flashcard matches for the filter: {word: ${filter.word}, wordType: ${filter.wordType}}`});
+  }
 });
 
 app.get("/about", function(req, res) {
