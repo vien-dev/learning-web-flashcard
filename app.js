@@ -119,6 +119,8 @@ app.get("/ajax/dynamic-content-from-openai", function(req, res) {
     flashCardImage: ""
   }
   if (foundedWord != null) {
+    let prompt=foundedWord.example;
+
     fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
       headers: {
@@ -126,7 +128,7 @@ app.get("/ajax/dynamic-content-from-openai", function(req, res) {
         "Authorization": `Bearer ${openAIAPIKey}`
       },
       body: JSON.stringify({
-        prompt: `${foundedWord.example}`,
+        prompt: prompt,
         n: 1,
         size: "256x256",
         response_format: "url"
