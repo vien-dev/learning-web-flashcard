@@ -119,28 +119,10 @@ app.get("/ajax/dynamic-content-from-openai", function(req, res) {
     flashCardImage: ""
   }
   if (foundedWord != null) {
-    let prompt=foundedWord.example;
+    let prompts=[foundedWord.example, foundedWord.definition, foundedWord.word];
+    let is_image_generated = false;
 
-    fetch("https://api.openai.com/v1/images/generations", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${openAIAPIKey}`
-      },
-      body: JSON.stringify({
-        prompt: prompt,
-        n: 1,
-        size: "256x256",
-        response_format: "url"
-      })
-    })
-    .then(openAIResponse => openAIResponse.json())
-    .then(function(openAIJSONData) {
-      responseJSON.flashCardImage = openAIJSONData.data[0].url;
-      res.json(responseJSON);
-    })
-    .catch(function() {
-      console.log("Getting error when fetching from OpenAI.");
+    for (current_prompt of prompts) {
       fetch("https://api.openai.com/v1/images/generations", {
         method: "POST",
         headers: {
@@ -148,7 +130,7 @@ app.get("/ajax/dynamic-content-from-openai", function(req, res) {
           "Authorization": `Bearer ${openAIAPIKey}`
         },
         body: JSON.stringify({
-          prompt: `${foundedWord.definition}`,
+          prompt: current_prompt,
           n: 1,
           size: "256x256",
           response_format: "url"
@@ -158,17 +140,21 @@ app.get("/ajax/dynamic-content-from-openai", function(req, res) {
       .then(function(openAIJSONData) {
         responseJSON.flashCardImage = openAIJSONData.data[0].url;
         res.json(responseJSON);
+        is_image_generated = true;
       })
       .catch(function(error) {
-        if (error.response) {
+        /*if (error.response) {
           console.log(error.response.status);
           console.log(error.response.data);
         } else {
           console.log(error.message);
-        }
-        res.json(responseJSON);
-      })
-    });
+        }*/
+      });
+
+      if (true === is_image_generated) {
+        break;
+      }
+    }
   }
 });
 
