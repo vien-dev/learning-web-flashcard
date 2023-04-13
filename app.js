@@ -1,6 +1,12 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const flashcardDBAdapter = require(__dirname + "/flashcard-db-adapter.js");
+const { Configuration, OpenAIApi } = require("openai");
+
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
 
 const app = express();
 
@@ -107,62 +113,49 @@ app.delete("/ajax/flashcard", bodyParser.json({type: 'application/json'}), funct
   }
 });
 
-app.get("/ajax/dynamic-content-from-openai", function(req, res) {
+app.get("/ajax/dynamic-content-from-openai", async function(req, res) {
   let wordInConcern = req.query.word;
   let wordTypeInConcern = req.query.wordType;
-  const openAIAPIKey = process.env.OPENAI_API_KEY;
-
-  let foundedWord = topPickFlashCards.find(function(flashCard) {
-    return flashCard.word === wordInConcern && flashCard.wordType === wordTypeInConcern;
-  });
 
   let responseJSON = {
     flashCardImage: ""
   }
-  if (foundedWord != null) {
+
+  try {
+    const result = await flashcardDBAdapter.findFlashcards(swedishFlashCardCollectionName, wordInConcern, wordTypeInConcern);
+    
+    let foundedWord = result[0];
+
     let prompts = [
-        `Generate an image that visually represents the concept of "${foundedWord.word}" in Swedish, without any text in the image`,
-        foundedWord.example, 
-        foundedWord.definition
+      `Skapa en bild för begreppet "${foundedWord.word}".`,
+      `Skapa en bild för begreppet "${foundedWord.definition}".`,
+      foundedWord.example
     ];
-    let is_image_generated = false;
 
     for (current_prompt of prompts) {
-      fetch("https://api.openai.com/v1/images/generations", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${openAIAPIKey}`
-        },
-        body: JSON.stringify({
+      try {
+        let openAIResponse = await openai.createImage({
           prompt: current_prompt,
-          n: 1,
-          size: "256x256",
-          response_format: "url"
-        })
-      })
-      .then(openAIResponse => openAIResponse.json())
-      .then(function(openAIJSONData) {
-        responseJSON.flashCardImage = openAIJSONData.data[0].url;
+          size: "256x256"
+        });
+        responseJSON.flashCardImage = openAIResponse.data.data[0].url;
         res.json(responseJSON);
-        is_image_generated = true;
-      })
-      .catch(function(error) {
-        console.log(`There's error when generating image for prompt ${current_prompt}`);
+        break;
+      } catch(error) {
+        console.log(`Failed to generate image for promt ${current_prompt}`);
         if (error.response) {
           console.log(error.response.status);
           console.log(error.response.data);
         } else {
           console.log(error.message);
         }
-      });
-
-      if (true === is_image_generated) {
-        console.log(`Image generated successfully for prompt ${current_prompt}`);
-        break;
       }
-    }
-  }
+    }  
+  } catch(err) {
+    console.log(err);
+    res.json(responseJSON);
+  };
+
 });
 
 app.get("/about", function(req, res) {
