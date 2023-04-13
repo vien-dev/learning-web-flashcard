@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const flashcardDBAdapter = require(__dirname + "/flashcard-db-adapter.js");
 
 const app = express();
 
@@ -8,6 +9,7 @@ app.set("view engine", 'ejs');
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(express.static("public"));
 
+const swedishFlashCardCollectionName = "swedishFlashcards";
 let topPickFlashCards = [
     { word:'hej',
       category: '',
@@ -44,7 +46,8 @@ let topPickFlashCards = [
       wordType: 'noun',
       extraInfo: ['ett', 'äpplet, äpplen, äpplena'],
       definition: 'Apple',
-      example: 'Titta! ett äpple!'}];
+      example: 'Titta! ett äpple!'}
+];
 
 app.get("/", function(req, res) {
     res.render("home", {
@@ -53,17 +56,15 @@ app.get("/", function(req, res) {
 })
 
 app.get("/ajax/flashcard", function(req, res) {
-  let wordInConcern = req.query.word;
-
-  let foundedWord = topPickFlashCards.find(function(flashCard) {
-    return flashCard.word === wordInConcern;
-  });
-
-  if (foundedWord != null) {
+  flashcardDBAdapter.findFlashcards(swedishFlashCardCollectionName, req.query.word, req.query.wordType)
+  .then(function(flashcards) {
+    let foundedWord = flashcards[0];
     res.json(foundedWord);
-  } else {
-    res.json({}); //not found
-  }
+  })
+  .catch(function(err) {
+    console.log(err);
+    res.json({});
+  });
 });
 
 app.post("/ajax/flashcard", bodyParser.json({type: 'application/json'}), function(req, res) {
@@ -119,7 +120,11 @@ app.get("/ajax/dynamic-content-from-openai", function(req, res) {
     flashCardImage: ""
   }
   if (foundedWord != null) {
-    let prompts=[foundedWord.example, foundedWord.definition, foundedWord.word];
+    let prompts = [
+        `Generate an image that visually represents the concept of "${foundedWord.word}" in Swedish, without any text in the image`,
+        foundedWord.example, 
+        foundedWord.definition
+    ];
     let is_image_generated = false;
 
     for (current_prompt of prompts) {
@@ -143,15 +148,17 @@ app.get("/ajax/dynamic-content-from-openai", function(req, res) {
         is_image_generated = true;
       })
       .catch(function(error) {
-        /*if (error.response) {
+        console.log(`There's error when generating image for prompt ${current_prompt}`);
+        if (error.response) {
           console.log(error.response.status);
           console.log(error.response.data);
         } else {
           console.log(error.message);
-        }*/
+        }
       });
 
       if (true === is_image_generated) {
+        console.log(`Image generated successfully for prompt ${current_prompt}`);
         break;
       }
     }
