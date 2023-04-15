@@ -55,61 +55,96 @@ let topPickFlashCards = [
       example: 'Titta! ett äpple!'}
 ];
 
-app.get("/", function(req, res) {
-    res.render("home", {
-        homeEJSTopPickFlashCards: topPickFlashCards
-    });
+app.get("/", async function(req, res) {
+    try {
+      let topPickFlashCards = await flashcardDBAdapter.getFlashcards(swedishFlashCardCollectionName);
+      res.render("home", {
+          homeEJSTopPickFlashCards: topPickFlashCards
+      });
+    } catch(err) {
+      console.log(err);
+      res.status(500).send("You know. I'm not in a good mood to serve you.")
+    }
 })
 
-app.get("/ajax/flashcard", function(req, res) {
-  flashcardDBAdapter.findFlashcards(swedishFlashCardCollectionName, req.query.word, req.query.wordType)
-  .then(function(flashcards) {
+app.get("/ajax/flashcard", async function(req, res) {
+  try {
+    let filter = {};
+    filter.word = req.query.word;
+    if (req.query.hasOwnProperty('wordType')) {
+      filter.wordType = req.body.wordType
+    }
+    filter.limit = 1;
+    const flashcardFilter = new flashcardDBAdapter.FlashcardFilter(filter);
+    const flashcards = await flashcardDBAdapter.getFlashcards(swedishFlashCardCollectionName, 
+                                                              flashcardFilter);
     let foundedWord = flashcards[0];
     res.json(foundedWord);
-  })
-  .catch(function(err) {
+  } catch(err) {
     console.log(err);
     res.json({});
-  });
+  };
 });
 
-app.post("/ajax/flashcard", bodyParser.json({type: 'application/json'}), function(req, res) {
-  const flashCardInEdit = req.body;
+app.post("/ajax/flashcard", bodyParser.json({type: 'application/json'}), async function(req, res) {
+  console.log(req.body);
+  const receivedFlashcard = req.body.flashcard;
+  const flashCardInEdit = new flashcardDBAdapter.Flashcard(
+    word =  receivedFlashcard.word,
+    wordType = receivedFlashcard.wordType,
+    category = receivedFlashcard.category,
+    extraInfo = receivedFlashcard.extraInfo,
+    definition = receivedFlashcard.definition,
+    example = receivedFlashcard.example,
+    lastRead = Date.now()
+  );
 
-  topPickFlashCards.push(flashCardInEdit.flashCard);
-
-  res.json({status: "ok"});
-  //res.json({status: "nok", error: "simply nok"});
-});
-
-app.put("/ajax/flashcard", bodyParser.json({type: 'application/json'}), function(req, res) {
-  const flashCardInEdit = req.body;
-
-  const foundIdx = topPickFlashCards.findIndex(function(flashCard) {
-    return (flashCard.word === flashCardInEdit.filter.word &&
-        flashCard.wordType === flashCardInEdit.filter.wordType);
-  });
-
-  if (foundIdx != -1) {
-    topPickFlashCards[foundIdx] = flashCardInEdit.flashCard;
+  try {
+    await flashcardDBAdapter.addFlashCard(swedishFlashCardCollectionName, flashCardInEdit)
+    res.json({status: "ok"});
+  } catch(err) {
+    console.log(err);
+    res.status(500).json({status: "nok", error: err});
   }
-
-  res.json({status: "ok"});
-  //res.json({status: "nok", error: "simply nok"});
 });
 
-app.delete("/ajax/flashcard", bodyParser.json({type: 'application/json'}), function(req, res) {
+app.put("/ajax/flashcard", bodyParser.json({type: 'application/json'}), async function(req, res) {
+  const flashCardInEdit = req.body;
+
+  try {
+    const flashcardFilter = new flashcardDBAdapter.FlashcardFilter({word : flashCardInEdit.filter.word,
+                                                            wordType : flashCardInEdit.filter.wordType});
+    const updatedFlashcard = new flashcardDBAdapter.Flashcard(
+      word = flashCardInEdit.flashCard.word,
+      wordType = flashCardInEdit.flashCard.wordType,
+      category = flashCardInEdit.flashCard.category,
+      extraInfo = flashCardInEdit.flashCard.extraInfo,
+      definition = flashCardInEdit.flashCard.definition,
+      example = flashCardInEdit.flashCard.example,
+      lastRead = Date.now()
+    );
+    await flashcardDBAdapter.updateFlashcard(swedishFlashCardCollectionName, flashcardFilter, updatedFlashcard);
+    res.json({status: "ok"});
+  } catch(err) {
+    console.log(err);
+    res.status(500).json({status: "nok", error: err});
+  }
+});
+
+app.delete("/ajax/flashcard", bodyParser.json({type: 'application/json'}), async function(req, res) {
   const filter = req.body;
 
-  const foundIdx = topPickFlashCards.findIndex(function(flashCard) {
-    return (flashCard.word === filter.word && flashCard.wordType === filter.wordType);
-  });
+  try {
+    const flashcardFilter = new flashcardDBAdapter.FlashcardFilter({
+      word : filter.word,
+      wordType : filter.wordType
+    });
+    await flashcardDBAdapter.deleteFlashCard(swedishFlashCardCollectionName, flashcardFilter);
 
-  if (foundIdx != -1) {
-    topPickFlashCards.splice(foundIdx, 1);
     res.json({status: "ok"});
-  } else {
-    res.json({status: "nok", error: `no flashcard matches for the filter: {word: ${filter.word}, wordType: ${filter.wordType}}`});
+  } catch(err) {
+    console.log(err);
+    res.status(500).json({status: "nok", error: err});
   }
 });
 
@@ -122,14 +157,18 @@ app.get("/ajax/dynamic-content-from-openai", async function(req, res) {
   }
 
   try {
-    const result = await flashcardDBAdapter.findFlashcards(swedishFlashCardCollectionName, wordInConcern, wordTypeInConcern);
+    const filter = new flashcardDBAdapter.FlashcardFilter({
+                                              word: wordInConcern, 
+                                              wordType: wordTypeInConcern,
+                                              limit: 1});
+    const result = await flashcardDBAdapter.getFlashcards(swedishFlashCardCollectionName, filter);
     
-    let foundedWord = result[0];
+    let foundedCard = result[0];
 
     let prompts = [
-      `Skapa en bild för begreppet "${foundedWord.word}".`,
-      `Skapa en bild för begreppet "${foundedWord.definition}".`,
-      foundedWord.example
+      `Skapa en bild för begreppet "${foundedCard.word}".`,
+      `Skapa en bild för begreppet "${foundedCard.definition}".`,
+      foundedCard.example
     ];
 
     for (current_prompt of prompts) {
@@ -137,6 +176,8 @@ app.get("/ajax/dynamic-content-from-openai", async function(req, res) {
         let openAIResponse = await openai.createImage({
           prompt: current_prompt,
           size: "256x256"
+        }, {
+          timeout: 4000 //ms
         });
         responseJSON.flashCardImage = openAIResponse.data.data[0].url;
         res.json(responseJSON);
@@ -152,7 +193,7 @@ app.get("/ajax/dynamic-content-from-openai", async function(req, res) {
       }
     }  
   } catch(err) {
-    console.log(err);
+    console.log(`Cannot generate image because of error ${err}`);
     res.json(responseJSON);
   };
 

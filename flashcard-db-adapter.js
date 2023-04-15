@@ -5,11 +5,8 @@ const flashCardSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    wordType: String,
     category: String,
-    wordType: {
-        type: String,
-        required: true
-    },
     extraInfo: [String],
     definition: {
         type: String,
@@ -39,9 +36,72 @@ function convertCollectionNameToMongooseModelName(collectionName) {
     return collectionName[0].toUpperCase() + collectionName.slice(1,-1); 
 }
 
+class Flashcard {
+    constructor(word, wordType, category, extraInfo, definition, example, lastRead) {
+        this.dbFlashcard = {
+            word : word,
+            wordType : wordType,
+            category : category,
+            extraInfo : extraInfo,
+            definition : definition,
+            example : example,
+            lastRead : lastRead
+        };
+        this.flashcard = {
+            word: word,
+            wordType: wordType,
+            category: category,
+            extraInfo: extraInfo,
+            definition: definition,
+            example: example,
+            lastRead: lastRead
+        }
+    }
+};
+class FlashcardFilter {
+    constructor({word = null, 
+            wordType = null, 
+            category = null, 
+            extraInfo = null, 
+            definition = null, 
+            example = null,
+            lastRead = null,
+            //no limit, returns all match
+            limit = 0, 
+            //if true and there're more than 1 match, a random btw matches will be returned.
+            //The adapter should ensure that if limit > 1 and withoutOrder is true
+            //the duplicated documents should be returned when picking randomly.
+            withoutOrder = false} = {}
+            ) {
+        this.dbFilter = {};
+        if (word != null) {
+            this.dbFilter.word = word;
+        }
+        if (wordType != null) {
+            this.dbFilter.wordType = wordType;
+        }
+        if (category != null) {
+            this.dbFilter.category = category;
+        }
+        if (extraInfo != null) {
+            this.dbFilter.extraInfo = extraInfo;
+        }
+        if (definition != null) {
+            this.dbFilter.definition = definition;
+        }
+        if (example != null) {
+            this.dbFilter.example = example;
+        }
+        if (lastRead != null) {
+            this.dbFilter.lastRead = lastRead;
+        }
+        this.limit = limit;
+    }
+};
+
 //create
-// input: flashcard
-// output: on ok: return _id
+// input: flashcard of type Flashcard
+// output: on ok: return nothing
 //         on failure: throw error
 async function addFlashCard(collectionName, flashcard) {
     // check if word exists in collection
@@ -51,11 +111,11 @@ async function addFlashCard(collectionName, flashcard) {
 
     let modelName = convertCollectionNameToMongooseModelName(collectionName);
 
-    const Flashcard = mongoose.model(modelName, flashCardSchema);
+    const dbFlashcard = mongoose.model(modelName, flashCardSchema);
 
-    let result = await Flashcard.countDocuments({
-        word: flashcard.word,
-        wordType: flashcard.wordType
+    let result = await dbFlashcard.countDocuments({
+        word: flashcard.dbFlashcard.word,
+        wordType: flashcard.dbFlashcard.wordType
     });
 
     if (result != 0) {
@@ -64,17 +124,8 @@ async function addFlashCard(collectionName, flashcard) {
     }
 
     try {
-        const newFlashCard = new Flashcard({
-            word: flashcard.word,
-            category: flashcard.category,
-            wordType: flashcard.wordType,
-            extraInfo: flashcard.extraInfo,
-            definition: flashcard.definition,
-            example: flashcard.example
-        });
-        await newFlashCard.save();
-
-        return current_count; //return _id of newly added flashcard.
+        const newDbFlashCard = new dbFlashcard(flashcard.dbFlashcard);
+        await newDbFlashCard.save();
     } catch (err) {
         throw new Error(`Facing error ${err} when adding new flashcard to ${collectionName}`);
     }
@@ -84,33 +135,60 @@ async function addFlashCard(collectionName, flashcard) {
 //read by word
 // input: flashcard word, flashcard wordType
 // output: (Obj) flashcard(s)
-async function findFlashcards(collectionName, wordInConcern, wordTypeInConcern = null, returnArray = false) {
-    let filter = { word: wordInConcern };
-    if ( wordTypeInConcern != null ) {
-        filter.wordType = wordTypeInConcern;
-    }
+async function getFlashcards(collectionName, flashcardFilter = new FlashcardFilter()) {
+    try {
+        await mongoose.connect(uri);
 
+        let modelName = convertCollectionNameToMongooseModelName(collectionName);
+
+        const dbFlashcard = mongoose.model(modelName, flashCardSchema);
+
+        const dbFlashcards = await dbFlashcard.find(flashcardFilter.dbFilter)
+                                            .limit(flashcardFilter.limit)
+                                            .select(["-_id"]);
+
+        if (0 === dbFlashcards.length) {
+            throw new Error("No match in DB");
+        }
+        const flashcards = dbFlashcards.map(function(dbFlashcard) {
+            return new Flashcard(
+                word = dbFlashcard.word,
+                wordType = dbFlashcard.wordType,
+                category = dbFlashcard.category,
+                extraInfo = dbFlashcard.extraInfo,
+                definition = dbFlashcard.definition,
+                example = dbFlashcard.example,
+                lastRead = dbFlashcard.lastRead
+            ).flashcard;
+        });
+
+        return flashcards;
+    } catch (err) {
+        throw new Error(`Couldn't find flashcard with filter ${JSON.stringify(flashcardFilter.dbFilter)} due error: ${err}`);
+    }
+}
+
+//get random flashcards
+/* TODO: implement later
+async function getRandomFlashcards(collectionName, limit = 9) {
     try {
         let connection = await mongoose.connect(uri);
 
         let modelName = convertCollectionNameToMongooseModelName(collectionName);
 
-        const Flashcard = mongoose.model(modelName, flashCardSchema);
-        const flashcards = await Flashcard.find(filter).limit(returnArray?0:1).select(["-_id", "-lastRead"]);
+        const dbFlashcard = mongoose.model(modelName, flashCardSchema);
+        const flashcards = await dbFlashcard.find({}).limit(limit).select(["-_id", "-lastRead"]);
 
-        if (null === flashcards || 0 === flashcards.length) {
+        if (0 === flashcards.length) {
             throw new Error("No match in DB");
         }
 
         return flashcards;
     } catch (err) {
-        if (wordTypeInConcern != null ) {
-            throw new Error(`Couldn't find flashcard with word: ${wordInConcern} and word type: ${wordTypeInConcern} due to error ${err}`);
-        } else {
-            throw new Error(`Couldn't find flashcard with word: ${wordInConcern} due to error ${err}`);
-        }
+        throw new Error(`Couldn't get flashcard(s) from DB due to error ${err}`);
     }
 }
+*/
 
 //read by category
 
@@ -118,26 +196,16 @@ async function findFlashcards(collectionName, wordInConcern, wordTypeInConcern =
 //input word
 // update flashcard
 // update lastRead
-async function updateFlashCard(collectionName, flashcardInConcern) {
+async function updateFlashcard(collectionName, flashcardFilter, updatedFlashcard) {
     try {
         await mongoose.connect(uri);
 
         let modelName = convertCollectionNameToMongooseModelName(collectionName);
 
-        const Flashcard = mongoose.model(modelName, flashCardSchema);
+        const dbFlashcard = mongoose.model(modelName, flashCardSchema);
 
-        let result = await Flashcard.findOneAndUpdate({
-            word: flashcardInConcern.word,
-            wordType: flashcardInConcern.wordType
-        }, {
-            word: flashcardInConcern.word,
-            category: flashcardInConcern.category,
-            wordType: flashcardInConcern.wordType,
-            extraInfo: flashcardInConcern.extraInfo,
-            definition: flashcardInConcern.definition,
-            example: flashcardInConcern.example,
-            lastRead: Date.now()
-        });
+        let result = await dbFlashcard.findOneAndUpdate(flashcardFilter.dbFilter, 
+                                                    updatedFlashcard.dbFlashcard);
 
         if (null === result) {
             throw new Error("Cannot update flashcard to DB");
@@ -147,43 +215,18 @@ async function updateFlashCard(collectionName, flashcardInConcern) {
     }
 }
 
-async function updateFlashCardLastRead(collectionName, flashcardInConcern) {
-    try {
-        await mongoose.connect(uri);
-
-        let modelName = convertCollectionNameToMongooseModelName(collectionName);
-
-        const Flashcard = mongoose.model(modelName, flashCardSchema);
-
-        let result = await Flashcard.findOneAndUpdate({
-            word: flashcardInConcern.word,
-            wordType: flashcardInConcern.wordType
-        }, {
-            lastRead: Date.now()
-        });
-
-        if (null === result) {
-            throw new Error("Cannot update flashcard's lastRead to DB");
-        }
-    } catch (err) {
-        throw new Error(`${err}`);
-    }
-}
 
 //delete
 //input word
-async function deleteFlashCard(collectionName, flashcardInConcern) {
+async function deleteFlashCard(collectionName, flashcardFilter) {
     try {
         await mongoose.connect(uri);
 
         let modelName = convertCollectionNameToMongooseModelName(collectionName);
 
-        const Flashcard = mongoose.model(modelName, flashCardSchema);
+        const dbFlashcard = mongoose.model(modelName, flashCardSchema);
 
-        let result = await Flashcard.findOneAndDelete({
-            word: flashcardInConcern.word,
-            wordType: flashcardInConcern.wordType
-        });
+        let result = await dbFlashcard.findOneAndDelete(flashcardFilter.dbFilter);
 
         if (null === result) {
             throw new Error("No flashcard available in DB to delete.");
@@ -193,8 +236,10 @@ async function deleteFlashCard(collectionName, flashcardInConcern) {
     }
 }
 
+exports.Flashcard = Flashcard;
+exports.FlashcardFilter = FlashcardFilter;
 exports.addFlashCard = addFlashCard;
-exports.findFlashcards = findFlashcards;
-exports.updateFlashCard = updateFlashCard;
-exports.updateFlashCardLastRead = updateFlashCardLastRead;
+exports.getFlashcards = getFlashcards;
+exports.updateFlashcard = updateFlashcard;
 exports.deleteFlashCard = deleteFlashCard;
+//exports.getRandomFlashcards = getRandomFlashcards;

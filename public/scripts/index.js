@@ -21,23 +21,23 @@ function queryDynamicContentFromOpenAI() {
 }
 
 function updateFlashCardDynamicContentFromOpenAI(dynamicContentFromOpenAI) {
-    if (dynamicContentFromOpenAI.flashCardImage != "") {
-        $(".flashcard-image").attr("src", dynamicContentFromOpenAI.flashCardImage);
+    if (dynamicContentFromOpenAI.flashcardImage != "") {
+        $(".flashcard-image").attr("src", dynamicContentFromOpenAI.flashcardImage);
     }
 }
 
-function showFlashCardUI(flashCard) {
-    if (!jQuery.isEmptyObject(flashCard)) {
-        currentFlashCard = flashCard;
+function showFlashCardUI(flashcard) {
+    if (!jQuery.isEmptyObject(flashcard)) {
+        currentFlashCard = flashcard;
         $(".customized-navbar").removeClass("large-bottom-margin");
         $(".customized-navbar").addClass("normal-bottom-margin");
 
-        if (flashCard.wordType != '') {
-            $(".flashcard-current.flashcard-front .card-text").html(`<span class="flashcard-word">${flashCard.word}</span> (<span class="flashcard-word-type">${flashCard.wordType}</span>)`);
+        if (flashcard.wordType != '') {
+            $(".flashcard-current.flashcard-front .card-text").html(`<span class="flashcard-word">${flashcard.word}</span> (<span class="flashcard-word-type">${flashcard.wordType}</span>)`);
         } else {
-            $(".flashcard-current.flashcard-front .card-text").html(`<span class="flashcard-word">${flashCard.word}</span>`);
+            $(".flashcard-current.flashcard-front .card-text").html(`<span class="flashcard-word">${flashcard.word}</span>`);
         }
-        let extraInfoHtlmString = flashCard.extraInfo.reduce(function(finalString, info, idx, arr) {
+        let extraInfoHtlmString = flashcard.extraInfo.reduce(function(finalString, info, idx, arr) {
             if (0 === idx) {
                 finalString += '<p class="flashcard flashcard-extra-info">Extra info: ';
             } else {
@@ -58,8 +58,8 @@ function showFlashCardUI(flashCard) {
         }
 
         $(".flashcard-image").attr("src", "/images/flashcard_placeholder.png");
-        $(".flashcard-current.flashcard-back p:first-child").text(`Definition: ${flashCard.definition}`);
-        $(".flashcard-current.flashcard-back p:first-child+p").text(`Example: ${flashCard.example}`);
+        $(".flashcard-current.flashcard-back p:first-child").text(`Definition: ${flashcard.definition}`);
+        $(".flashcard-current.flashcard-back p:first-child+p").text(`Example: ${flashcard.example}`);
 
         $(".current-word-container.view-only").removeClass("d-none");
         $(".flashcard-current.flashcard-front").removeClass("d-none");
@@ -121,7 +121,7 @@ function exitEditMode() {
     showStartScreen();
 }
 
-function enterEditMode(flashCard) {
+function enterEditMode(flashcard) {
     isEditing = true;
 
     $(".current-word-container.view-only").addClass("d-none");
@@ -129,15 +129,15 @@ function enterEditMode(flashCard) {
 
     resetEditModeUI();
 
-    if (!jQuery.isEmptyObject(flashCard)) {
-        $("#inputWordInEdit").val(flashCard.word);
-        $("#inputCategoryInEdit").val(flashCard.category);
-        $("#inputWordTypeInEdit").val(flashCard.wordType);
-        flashCard.extraInfo.forEach(function(extraInfo) {
+    if (!jQuery.isEmptyObject(flashcard)) {
+        $("#inputWordInEdit").val(flashcard.word);
+        $("#inputCategoryInEdit").val(flashcard.category);
+        $("#inputWordTypeInEdit").val(flashcard.wordType);
+        flashcard.extraInfo.forEach(function(extraInfo) {
             editModeAddExtraInfo(extraInfo);
         });
-        $("#inputDefinitionInEdit").val(flashCard.definition);
-        $("#inputExampleInEdit").val(flashCard.example);
+        $("#inputDefinitionInEdit").val(flashcard.definition);
+        $("#inputExampleInEdit").val(flashcard.example);
 
         $("#btnRemoveWord").removeClass("d-none");
     } else {
@@ -213,13 +213,13 @@ $("#btnSubmitEditWord").click(function() {
     if (!jQuery.isEmptyObject(currentFlashCard)) {
         methodInUse="PUT";
         filterInUse={
-            word: jQuery.isEmptyObject(currentFlashCard)?'':currentFlashCard.word,
-            wordType: jQuery.isEmptyObject(currentFlashCard)?'':currentFlashCard.wordType
+            word: currentFlashCard.word,
+            wordType: currentFlashCard.wordType
         }
     }
-    const flashCardInEdit = {
+    const flashcardInEdit = {
         filter: filterInUse,
-        flashCard: {
+        flashcard: {
             word: wordInEdit,
             category: categoryInEdit,
             wordType: wordTypeInEdit,
@@ -234,7 +234,7 @@ $("#btnSubmitEditWord").click(function() {
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify(flashCardInEdit),
+        body: JSON.stringify(flashcardInEdit),
     })
     .then(response => response.json())
     .then(function(data) {
