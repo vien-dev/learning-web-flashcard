@@ -81,19 +81,19 @@ app.put("/ajax/flashcard", bodyParser.json({type: 'application/json'}), async fu
     const flashcardFilter = new flashcardDBAdapter.FlashcardFilter({word : flashCardInEdit.filter.word,
                                                             wordType : flashCardInEdit.filter.wordType});
     const updatedFlashcard = new flashcardDBAdapter.Flashcard(
-      word = flashCardInEdit.flashCard.word,
-      wordType = flashCardInEdit.flashCard.wordType,
-      category = flashCardInEdit.flashCard.category,
-      extraInfo = flashCardInEdit.flashCard.extraInfo,
-      definition = flashCardInEdit.flashCard.definition,
-      example = flashCardInEdit.flashCard.example,
+      word = flashCardInEdit.flashcard.word,
+      wordType = flashCardInEdit.flashcard.wordType,
+      category = flashCardInEdit.flashcard.category,
+      extraInfo = flashCardInEdit.flashcard.extraInfo,
+      definition = flashCardInEdit.flashcard.definition,
+      example = flashCardInEdit.flashcard.example,
       lastRead = Date.now()
     );
     await flashcardDBAdapter.updateFlashcard(swedishFlashCardCollectionName, flashcardFilter, updatedFlashcard);
     res.json({status: "ok"});
   } catch(err) {
     console.log(err);
-    res.status(500).json({status: "nok", error: err});
+    res.status(500).json({status: "nok", error: JSON.stringify(err)});
   }
 });
 
