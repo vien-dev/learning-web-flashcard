@@ -16,44 +16,10 @@ app.use(bodyParser.urlencoded({extended:true}));
 app.use(express.static("public"));
 
 const swedishFlashCardCollectionName = "swedishFlashcards";
-let topPickFlashCards = [
-    { word:'hej',
-      category: '',
-      wordType: '',
-      extraInfo: [],
-      definition: 'A way to say hi',
-      example: 'Hej! hur mår du?'},
-    { word: 'hej då',
-      category: '',
-      wordType: '',
-      extraInfo: [],
-      definition: 'Goodbye!',
-      example: 'hej då! vi ses i morgon!'},
-    { word:'nej',
-      category: '',
-      wordType: '',
-      extraInfo: [],
-      definition: 'A way to say no',
-      example: 'Nej! Jag vill inte äta dem.'},
-    { word: 'titta',
-      category: '',
-      wordType: 'verb',
-      extraInfo: ['tittade, tittat, titta, tittar'],
-      definition: 'Look!',
-      example: 'Titta! Bakom dig! (look! behind you!)'},
-    { word: 'sitta',
-      category: '',
-      wordType: 'verb',
-      extraInfo: ['satt, suttit, sitt, sitta, sitter'],
-      definition: 'Sit!',
-      example: 'Sitta här! (sit down here!)'},
-    { word:'äpple',
-      category: '',
-      wordType: 'noun',
-      extraInfo: ['ett', 'äpplet, äpplen, äpplena'],
-      definition: 'Apple',
-      example: 'Titta! ett äpple!'}
-];
+let port = 3000;
+if ('PORT' in process.env) {
+  port = process.env.PORT;
+}
 
 app.get("/", async function(req, res) {
     try {
@@ -211,6 +177,6 @@ app.get("*", function(req, res) {
     res.status(404).send("Page not found!!!");
 })
 
-app.listen((process.env.PORT | 3000), function() {
+app.listen(port, function() {
     console.log("FlashCard server started at port 3000!");
 });
