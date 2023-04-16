@@ -177,7 +177,7 @@ app.get("/ajax/dynamic-content-from-openai", async function(req, res) {
           prompt: current_prompt,
           size: "256x256"
         }, {
-          timeout: 4000 //ms
+          timeout: 3000 //ms
         });
         responseJSON.flashCardImage = openAIResponse.data.data[0].url;
         res.json(responseJSON);
