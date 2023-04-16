@@ -178,5 +178,5 @@ app.get("*", function(req, res) {
 })
 
 app.listen(port, function() {
-    console.log("FlashCard server started at port 3000!");
+    console.log(`FlashCard server started at port ${port}!`);
 });
