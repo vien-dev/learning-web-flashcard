@@ -126,9 +126,9 @@ app.get("/ajax/dynamic-content-from-openai", async function(req, res) {
     let foundedCard = result[0];
 
     let prompts = [
-      `Skapa en bild för begreppet "${foundedCard.word}".`,
-      `Skapa en bild för begreppet "${foundedCard.definition}".`,
-      foundedCard.example
+      foundedCard.example,
+      foundedCard.definition,
+      `Skapa en bild för begreppet "${foundedCard.word}".`
     ];
 
     for (current_prompt of prompts) {
