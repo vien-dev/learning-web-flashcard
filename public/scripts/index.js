@@ -21,7 +21,6 @@ async function queryDynamicContentFromOpenAI() {
 }
 
 function updateFlashCardDynamicContentFromOpenAI(dynamicContentFromOpenAI) {
-    console.log(dynamicContentFromOpenAI);
     if (dynamicContentFromOpenAI.flashcardImage != "") {
         $(".flashcard-image").attr("src", dynamicContentFromOpenAI.flashcardImage);
     }
@@ -59,8 +58,8 @@ function showFlashCardUI(flashcard) {
         }
 
         $(".flashcard-image").attr("src", "/images/flashcard_placeholder.png");
-        $(".flashcard-current.flashcard-back p:first-child").text(`Definition: ${flashcard.definition}`);
-        $(".flashcard-current.flashcard-back p:first-child+p").text(`Example: ${flashcard.example}`);
+        $(".flashcard-current .word-definition-style").text(`${flashcard.definition}`);
+        $(".flashcard-current .word-example-style").text(`Ex: ${flashcard.example}`);
 
         $(".current-word-container.view-only").removeClass("d-none");
         $(".flashcard-current.flashcard-front").removeClass("d-none");

@@ -46,6 +46,14 @@ body {
 	font-size: xx-large;
 }
 
+.word-definition-style {
+	color: green;
+}
+
+.word-example-style {
+	color: blue;
+}
+
 .view-only {
 	width: 40%;
 	margin-left: auto;
