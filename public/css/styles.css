@@ -48,10 +48,12 @@ body {
 
 .word-definition-style {
 	color: green;
+	font-size: larger;
 }
 
 .word-example-style {
 	color: blue;
+	font-size: larger;
 }
 
 .view-only {
