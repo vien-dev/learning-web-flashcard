@@ -1,12 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const flashcardDBAdapter = require(__dirname + "/flashcard-db-adapter.js");
-const { Configuration, OpenAIApi } = require("openai");
-
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
 
 const app = express();
 
@@ -15,7 +9,7 @@ app.set("view engine", 'ejs');
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(express.static("public"));
 
-const swedishFlashCardCollectionName = "swedishFlashcards";
+const swedishFlashcardCollectionName = "swedishFlashcards";
 let port = 3000;
 if ('PORT' in process.env) {
   port = process.env.PORT;
@@ -23,9 +17,9 @@ if ('PORT' in process.env) {
 
 app.get("/", async function(req, res) {
     try {
-      let topPickFlashCards = await flashcardDBAdapter.getFlashcards(swedishFlashCardCollectionName);
+      let topPickFlashcards = await flashcardDBAdapter.getFlashcards(swedishFlashcardCollectionName);
       res.render("home", {
-          homeEJSTopPickFlashCards: topPickFlashCards
+          homeEJSTopPickFlashcards: topPickFlashcards
       });
     } catch(err) {
       console.log(err);
@@ -42,7 +36,7 @@ app.get("/ajax/flashcard", async function(req, res) {
     }
     filter.limit = 1;
     const flashcardFilter = new flashcardDBAdapter.FlashcardFilter(filter);
-    const flashcards = await flashcardDBAdapter.getFlashcards(swedishFlashCardCollectionName, 
+    const flashcards = await flashcardDBAdapter.getFlashcards(swedishFlashcardCollectionName, 
                                                               flashcardFilter);
     let foundedWord = flashcards[0];
     res.json(foundedWord);
@@ -55,7 +49,7 @@ app.get("/ajax/flashcard", async function(req, res) {
 app.post("/ajax/flashcard", bodyParser.json({type: 'application/json'}), async function(req, res) {
   console.log(req.body);
   const receivedFlashcard = req.body.flashcard;
-  const flashCardInEdit = new flashcardDBAdapter.Flashcard(
+  const flashcardInEdit = new flashcardDBAdapter.Flashcard(
     word =  receivedFlashcard.word,
     wordType = receivedFlashcard.wordType,
     category = receivedFlashcard.category,
@@ -66,7 +60,7 @@ app.post("/ajax/flashcard", bodyParser.json({type: 'application/json'}), async f
   );
 
   try {
-    await flashcardDBAdapter.addFlashCard(swedishFlashCardCollectionName, flashCardInEdit)
+    await flashcardDBAdapter.addFlashcard(swedishFlashcardCollectionName, flashcardInEdit)
     res.json({status: "ok"});
   } catch(err) {
     console.log(err);
@@ -75,21 +69,21 @@ app.post("/ajax/flashcard", bodyParser.json({type: 'application/json'}), async f
 });
 
 app.put("/ajax/flashcard", bodyParser.json({type: 'application/json'}), async function(req, res) {
-  const flashCardInEdit = req.body;
+  const flashcardInEdit = req.body;
 
   try {
-    const flashcardFilter = new flashcardDBAdapter.FlashcardFilter({word : flashCardInEdit.filter.word,
-                                                            wordType : flashCardInEdit.filter.wordType});
+    const flashcardFilter = new flashcardDBAdapter.FlashcardFilter({word : flashcardInEdit.filter.word,
+                                                            wordType : flashcardInEdit.filter.wordType});
     const updatedFlashcard = new flashcardDBAdapter.Flashcard(
-      word = flashCardInEdit.flashcard.word,
-      wordType = flashCardInEdit.flashcard.wordType,
-      category = flashCardInEdit.flashcard.category,
-      extraInfo = flashCardInEdit.flashcard.extraInfo,
-      definition = flashCardInEdit.flashcard.definition,
-      example = flashCardInEdit.flashcard.example,
+      word = flashcardInEdit.flashcard.word,
+      wordType = flashcardInEdit.flashcard.wordType,
+      category = flashcardInEdit.flashcard.category,
+      extraInfo = flashcardInEdit.flashcard.extraInfo,
+      definition = flashcardInEdit.flashcard.definition,
+      example = flashcardInEdit.flashcard.example,
       lastRead = Date.now()
     );
-    await flashcardDBAdapter.updateFlashcard(swedishFlashCardCollectionName, flashcardFilter, updatedFlashcard);
+    await flashcardDBAdapter.updateFlashcard(swedishFlashcardCollectionName, flashcardFilter, updatedFlashcard);
     res.json({status: "ok"});
   } catch(err) {
     console.log(err);
@@ -105,7 +99,7 @@ app.delete("/ajax/flashcard", bodyParser.json({type: 'application/json'}), async
       word : filter.word,
       wordType : filter.wordType
     });
-    await flashcardDBAdapter.deleteFlashCard(swedishFlashCardCollectionName, flashcardFilter);
+    await flashcardDBAdapter.deleteFlashcard(swedishFlashcardCollectionName, flashcardFilter);
 
     res.json({status: "ok"});
   } catch(err) {
@@ -119,7 +113,7 @@ app.get("/ajax/dynamic-content-from-openai", async function(req, res) {
   let wordTypeInConcern = req.query.wordType;
 
   let responseJSON = {
-    flashCardImage: ""
+    flashcardImage: ""
   }
 
   try {
@@ -127,7 +121,7 @@ app.get("/ajax/dynamic-content-from-openai", async function(req, res) {
                                               word: wordInConcern, 
                                               wordType: wordTypeInConcern,
                                               limit: 1});
-    const result = await flashcardDBAdapter.getFlashcards(swedishFlashCardCollectionName, filter);
+    const result = await flashcardDBAdapter.getFlashcards(swedishFlashcardCollectionName, filter);
     
     let foundedCard = result[0];
 
@@ -139,14 +133,26 @@ app.get("/ajax/dynamic-content-from-openai", async function(req, res) {
 
     for (current_prompt of prompts) {
       try {
-        let openAIResponse = await openai.createImage({
-          prompt: current_prompt,
-          size: "256x256"
-        }/*, {
-          timeout: 3000 //ms
-        }*/);
-        responseJSON.flashCardImage = openAIResponse.data.data[0].url;
+        console.log(current_prompt);
+        let openAIResponse = await fetch("https://api.openai.com/v1/images/generations", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+          },
+          body: JSON.stringify({
+            prompt: current_prompt,
+            n: 1,
+            size: "256x256",
+            response_format: "url"
+          })
+        })
+        .then(result => result.json());
+        
+        console.log(openAIResponse);
+        responseJSON.flashcardImage = openAIResponse.data[0].url;
         res.json(responseJSON);
+        
         break;
       } catch(error) {
         console.log(`Failed to generate image for promt ${current_prompt}`);
@@ -178,5 +184,5 @@ app.get("*", function(req, res) {
 })
 
 app.listen(port, function() {
-    console.log(`FlashCard server started at port ${port}!`);
+    console.log(`Flashcard server started at port ${port}!`);
 });

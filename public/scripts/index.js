@@ -9,18 +9,19 @@ function queryWord(filter) {
     })
 }
 
-function queryDynamicContentFromOpenAI() {
+async function queryDynamicContentFromOpenAI() {
     const filter = {
         word: currentFlashCard.word,
         wordType: currentFlashCard.wordType
     };
 
-    fetch('/ajax/dynamic-content-from-openai?' + new URLSearchParams(filter))
-    .then(response => response.json())
-    .then(queriedOpenAIDynamicContent => updateFlashCardDynamicContentFromOpenAI(queriedOpenAIDynamicContent))
+    let queriedOpenAIDynamicContent = await fetch('/ajax/dynamic-content-from-openai?' + new URLSearchParams(filter))
+    .then(response => response.json());
+    updateFlashCardDynamicContentFromOpenAI(queriedOpenAIDynamicContent);
 }
 
 function updateFlashCardDynamicContentFromOpenAI(dynamicContentFromOpenAI) {
+    console.log(dynamicContentFromOpenAI);
     if (dynamicContentFromOpenAI.flashcardImage != "") {
         $(".flashcard-image").attr("src", dynamicContentFromOpenAI.flashcardImage);
     }
