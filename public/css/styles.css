@@ -1,6 +1,7 @@
 body {
     text-align: center;
-    background-color: #d4c8c8;
+    background-color: #f6f6f6;
+    font-family: Arial, sans-serif;
 }
 
 .customized-navbar {
@@ -34,7 +35,15 @@ body {
 }
 
 .flashcard {
-	background-color: rgb(159, 159, 67);
+	background-color: #FFFFFF;
+	border-radius: 10px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	cursor: pointer;
+}
+
+.flashcard-front {
+	background-color: #5FA9E9;
+	color: #FFFFFF;
 }
 
 .flashcard .flashcard-word{
