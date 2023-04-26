@@ -38,6 +38,8 @@ body {
 	background-color: #FFFFFF;
 	border-radius: 10px;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	font-family: 'Montserrat', sans-serif;
+	color: #90A4AE;
 }
 
 .flashcard-current {
@@ -66,14 +68,27 @@ body {
 	font-size: xx-large;
 }
 
+.flashcard-back {
+    background-color: #F2F2F2;
+    color: #333333;
+}
+
 .word-definition-style {
-	color: green;
-	font-size: larger;
+    color: #607D8B; /* blue gray */
+    font-size: larger;
 }
 
 .word-example-style {
-	color: blue;
-	font-size: larger;
+    color: #2196F3; /* blue */
+    font-size: larger;
+}
+
+.carousel-control-prev-icon {
+background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23607D8B' viewBox='0 0 8 8'%3E%3Cpath d='M5.25 0l-4 4 4 4 1.5-1.5-2.5-2.5 2.5-2.5-1.5-1.5z'/%3E%3C/svg%3E") !important;
+}
+
+.carousel-control-next-icon {
+	background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23607D8B' viewBox='0 0 8 8'%3E%3Cpath d='M2.75 0l-1.5 1.5 2.5 2.5-2.5 2.5 1.5 1.5 4-4-4-4z'/%3E%3C/svg%3E") !important;
 }
 
 .view-only {
@@ -95,10 +110,10 @@ footer p {
 	color: #fff;
 }
 footer .footer-msg {
-	margin-top: 1%;
-	margin-bottom: 1%;
+    margin-bottom: 0;
 }
 footer .footer-copyright {
 	margin-top: 0;
+	margin-bottom: 0;
 	color: #848080;
 }
