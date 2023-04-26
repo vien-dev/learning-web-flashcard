@@ -39,7 +39,7 @@ function showFlashcardUI(flashcard) {
         }
         let extraInfoHtlmString = flashcard.extraInfo.reduce(function(finalString, info, idx, arr) {
             if (0 === idx) {
-                finalString += '<p class="flashcard-extra-info">Extra info: ';
+                finalString += '<p class="flashcard-extra-info">';
             } else {
                 finalString += '<br/>';
             }
