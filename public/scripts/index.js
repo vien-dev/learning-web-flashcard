@@ -33,7 +33,7 @@ function showFlashcardUI(flashcard) {
         $(".customized-navbar").addClass("normal-bottom-margin");
 
         if (flashcard.wordType != '') {
-            $(".flashcard-current .flashcard-word").html(`${flashcard.word} (<span class="flashcard-word-type">${flashcard.wordType}</span>)`);
+            $(".flashcard-current .flashcard-word").html(`${flashcard.word} <span class="flashcard-word-type">(${flashcard.wordType})</span>`);
         } else {
             $(".flashcard-current .flashcard-word").text(flashcard.word);
         }

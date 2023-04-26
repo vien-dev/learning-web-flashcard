@@ -67,6 +67,10 @@ body {
 .flashcard-current .flashcard-word {
 	font-size: xx-large;
 }
+.flashcard-current .flashcard-word-type {
+	font-size: large;
+	opacity: 70%;
+}
 
 .flashcard-back {
     background-color: #F2F2F2;
