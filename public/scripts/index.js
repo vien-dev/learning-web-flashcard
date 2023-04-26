@@ -5,7 +5,7 @@ function queryWord(filter) {
     fetch('/ajax/flashcard?' + new URLSearchParams(filter))
     .then(response => response.json())
     .then(function(queriedFlashCardData) {
-        showFlashCardUI(queriedFlashCardData)
+        showFlashcardUI(queriedFlashCardData)
     })
 }
 
@@ -26,16 +26,16 @@ function updateFlashCardDynamicContentFromOpenAI(dynamicContentFromOpenAI) {
     }
 }
 
-function showFlashCardUI(flashcard) {
+function showFlashcardUI(flashcard) {
     if (!jQuery.isEmptyObject(flashcard)) {
         currentFlashCard = flashcard;
         $(".customized-navbar").removeClass("large-bottom-margin");
         $(".customized-navbar").addClass("normal-bottom-margin");
 
         if (flashcard.wordType != '') {
-            $(".flashcard-current.flashcard-front .card-text").html(`<span class="flashcard-word">${flashcard.word}</span> (<span class="flashcard-word-type">${flashcard.wordType}</span>)`);
+            $(".flashcard-current .flashcard-word").html(`${flashcard.word} (<span class="flashcard-word-type">${flashcard.wordType}</span>)`);
         } else {
-            $(".flashcard-current.flashcard-front .card-text").html(`<span class="flashcard-word">${flashcard.word}</span>`);
+            $(".flashcard-current .flashcard-word").text(flashcard.word);
         }
         let extraInfoHtlmString = flashcard.extraInfo.reduce(function(finalString, info, idx, arr) {
             if (0 === idx) {
@@ -52,18 +52,18 @@ function showFlashCardUI(flashcard) {
 
             return finalString;
         }, '');
-        $(".flashcard-current.flashcard-front .flashcard-extra-info").remove();
+        $(".flashcard-current .flashcard-extra-info").remove();
         if (extraInfoHtlmString != '') {
-            $(".flashcard-current.flashcard-front .card-text").after(extraInfoHtlmString);
+            $(".flashcard-current .card-text").after(extraInfoHtlmString);
         }
 
-        $(".flashcard-image").attr("src", "/images/flashcard_placeholder.png");
-        $(".flashcard-current .word-definition-style").text(`${flashcard.definition}`);
-        $(".flashcard-current .word-example-style").text(`Ex: ${flashcard.example}`);
+        $(".flashcard-current .flashcard-image").attr("src", "/images/flashcard_placeholder.png");
+        $(".flashcard-current .flashcard-word-definition").text(`${flashcard.definition}`);
+        $(".flashcard-current .flashcard-word-example").text(`Ex: ${flashcard.example}`);
 
         $(".current-word-container.view-only").removeClass("d-none");
-        $(".flashcard-current.flashcard-front").removeClass("d-none");
-        $(".flashcard-current.flashcard-back").addClass("d-none");
+        $(".flashcard-current .flashcard-front").removeClass("d-none");
+        $(".flashcard-current .flashcard-back").addClass("d-none");
 
         $(".search > input").val("");
         $(".search").removeClass("medium-bottom-margin");
@@ -288,14 +288,14 @@ $("#btnRemoveWord").click(function() {
     }
 })
 
-$(".flashcard-current.flashcard-front").click(function(e) {
+$(".flashcard-current .flashcard-front").click(function(e) {
     this.classList.toggle("d-none");
-    $(".flashcard-current.flashcard-back").toggleClass("d-none");
+    $(".flashcard-current .flashcard-back").toggleClass("d-none");
 });
 
-$(".flashcard-current.flashcard-back").click(function(e) {
+$(".flashcard-current .flashcard-back").click(function(e) {
     this.classList.toggle("d-none");
-    $(".flashcard-current.flashcard-front").toggleClass("d-none");
+    $(".flashcard-current .flashcard-front").toggleClass("d-none");
 });
 
 $(".search input").keypress(function(e) {

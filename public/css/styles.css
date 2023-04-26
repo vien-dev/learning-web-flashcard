@@ -38,12 +38,23 @@ body {
 	background-color: #FFFFFF;
 	border-radius: 10px;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-	cursor: pointer;
 }
 
+.flashcard-current {
+	height: 250px;
+	width: 500px;
+}
 .flashcard-front {
 	background-color: #5FA9E9;
 	color: #FFFFFF;
+	height: 100%;
+}
+.flashcard-back {
+	height: 100%;
+}
+
+.card-body {
+	cursor: pointer;
 }
 
 .flashcard .flashcard-word{

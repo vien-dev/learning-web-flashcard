@@ -9,26 +9,28 @@
 </div>
 
 <div class="current-word-container view-only normal-bottom-margin d-none">
-    <div class="card flashcard flashcard-current flashcard-front d-none">
-        <div class="card-body">
-            <p class="card-text"></p>
-        </div>
-    </div>
-    <div class="card flashcard flashcard-current flashcard-back d-none"> 
-        <div class="card-body container-fluid">
-            <div class="row">
-                <div class="col-md-5">
-                    <img class="flashcard-image img-fluid" src="/images/flashcard_placeholder.png" alt="Image depicts the example sentence">
-                </div>
-                <div class="col-md-7">
-                    <p class="card-text text-start word-definition-style"></p>
-                    <p class="card-text text-start word-example-style">Ex: </p>
-                </div>
+    <div class="flashcard flashcard-current">
+        <div class="card flashcard-front d-none">
+            <div class="card-body">
+                <p class="flashcard-word"></p>
             </div>
-            <div class="row justify-content-end">
-                <button id="btnEditWord" class="btn btn-outline-secondary bg-none border-0 col-1" type="button">
-                    <i class="bi bi-pencil-square"></i>
-                </button>
+        </div>
+        <div class="card flashcard-back d-none"> 
+            <div class="card-body container-fluid">
+                <div class="row">
+                    <div class="col-md-5">
+                        <img class="flashcard-image img-fluid" src="/images/flashcard_placeholder.png" alt="Image depicts the example sentence">
+                    </div>
+                    <div class="col-md-7">
+                        <p class="card-text text-start flashcard-word-definition word-definition-style"></p>
+                        <p class="card-text text-start flashcard-word-example word-example-style">Ex: </p>
+                    </div>
+                </div>
+                <div class="row justify-content-end">
+                    <button id="btnEditWord" class="btn btn-outline-secondary bg-none border-0 col-1" type="button">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
