@@ -39,7 +39,7 @@ function showFlashcardUI(flashcard) {
         }
         let extraInfoHtlmString = flashcard.extraInfo.reduce(function(finalString, info, idx, arr) {
             if (0 === idx) {
-                finalString += '<p class="flashcard flashcard-extra-info">Extra info: ';
+                finalString += '<p class="flashcard-extra-info">Extra info: ';
             } else {
                 finalString += '<br/>';
             }
@@ -54,7 +54,7 @@ function showFlashcardUI(flashcard) {
         }, '');
         $(".flashcard-current .flashcard-extra-info").remove();
         if (extraInfoHtlmString != '') {
-            $(".flashcard-current .card-text").after(extraInfoHtlmString);
+            $(".flashcard-current .flashcard-word").after(extraInfoHtlmString);
         }
 
         $(".flashcard-current .flashcard-image").attr("src", "/images/flashcard_placeholder.png");
