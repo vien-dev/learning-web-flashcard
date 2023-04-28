@@ -39,6 +39,7 @@ body {
     cursor: pointer;
     border-radius: 0.375rem;
     box-shadow: 0 0.2vw 1vw rgba(0, 0, 0, 0.6);
+    margin-bottom: 1%;
 }
 
 .flashcard-side {
@@ -53,15 +54,18 @@ body {
     color: #90A4AE;
 }
 
-.flashcard-current {
+.flashcard-current,
+.flashcard-in-edit {
     height: 260px;
 }
+
 .flashcard-image {
     width: 75%;
 }
 /* Set a fixed height for the flashcard at screen sizes larger than 768px */
 @media screen and (min-width: 768px) and (max-width: 992px){
-    .flashcard-current {
+    .flashcard-current,
+    .flashcard-in-edit {
         height: 350px;
     }
     .flashcard-image {
@@ -79,6 +83,22 @@ body {
 }
 
 .flashcard-current .flashcard-back {
+    background-color: #F2F2F2;
+    color: #333333;
+    padding-top: 3%;
+}
+
+.flashcard-in-edit .flashcard-side {
+    height: 100%;
+    padding: 5%;
+}
+
+.flashcard-in-edit .flashcard-front {
+    background-color: #5FA9E9;
+    color: #FFFFFF;
+}
+
+.flashcard-in-edit .flashcard-back {
     background-color: #F2F2F2;
     color: #333333;
     padding-top: 3%;
@@ -118,9 +138,6 @@ body {
 .carousel-item .row {
     padding-top: 1%;
     padding-bottom: 1%;
-}
-.carousel-item .flashcard {
-    margin-bottom: 1%;
 }
 
 footer {
