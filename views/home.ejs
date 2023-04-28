@@ -8,35 +8,35 @@
     </span>
 </div>
 
-<div class="current-word-container view-only normal-bottom-margin d-none">
-    <div class="flashcard flashcard-current">
-        <div class="card flashcard-front d-none">
-            <div class="card-body">
-                <p class="flashcard-word"></p>
-            </div>
-        </div>
-        <div class="card flashcard-back d-none"> 
-            <div class="card-body container-fluid">
-                <div class="row">
-                    <div class="col-md-5">
-                        <img class="flashcard-image img-fluid" src="/images/flashcard_placeholder.png" alt="Image depicts the example sentence">
-                    </div>
-                    <div class="col-md-7">
-                        <p class="card-text text-start flashcard-word-definition word-definition-style"></p>
-                        <p class="card-text text-start flashcard-word-example word-example-style">Ex: </p>
-                    </div>
+<div id="view-edit-session" class="container-fluid d-none normal-bottom-margin ">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="flashcard flashcard-current">
+                <div class="flashcard-side flashcard-front d-none">
+                    <p class="flashcard-word"></p>
                 </div>
-                <div class="row justify-content-end">
-                    <button id="btnEditWord" class="btn btn-outline-secondary bg-none border-0 col-1" type="button">
-                        <i class="bi bi-pencil-square"></i>
-                    </button>
+                <div class="flashcard-side flashcard-back container-fluid d-none">
+                    <div class="row">
+                        <div class="col-5">
+                            <img class="flashcard-image img-fluid" src="/images/flashcard_placeholder.png" alt="Image depicts the example sentence">
+                        </div>
+                        <div class="col-7">
+                            <p class="text-start flashcard-word-definition"></p>
+                            <p class="text-start flashcard-word-example">Ex: </p>
+                        </div>
+                    </div>
+                    <div class="row justify-content-end">
+                        <button id="btnEditWord" class="btn btn-outline-secondary bg-none border-0 col-1" type="button">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="container current-word-container edit normal-bottom-margin d-none">
+<div class="container edit normal-bottom-margin d-none">
     <div class="row justify-content-center">
         <div class="col-md-5">
             <div class="container card flashcard">
@@ -104,10 +104,10 @@
                             <div class="row">
                 <% } %>
                                 <div class="col-md-4">
-                                    <div class="card flashcard">
-                                        <div class="card-body">
+                                    <div class="flashcard">
+                                        <div class="flashcard-side flashcard-front">
                                             <% if (flashCard.wordType != '') { %>
-                                            <p><span class="flashcard-word"><%= flashCard.word %></span> (<span class="flashcard-word-type"><%= flashCard.wordType %></span>)</p>
+                                            <p><span class="flashcard-word"><%= flashCard.word %></span> <span class="flashcard-word-type">(<%= flashCard.wordType %>)</span></p>
                                             <% } else { %>
                                             <p><span class="flashcard-word"><%= flashCard.word %></span></p>
                                             <% } %>

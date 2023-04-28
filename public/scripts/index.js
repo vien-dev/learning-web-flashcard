@@ -61,7 +61,7 @@ function showFlashcardUI(flashcard) {
         $(".flashcard-current .flashcard-word-definition").text(`${flashcard.definition}`);
         $(".flashcard-current .flashcard-word-example").text(`Ex: ${flashcard.example}`);
 
-        $(".current-word-container.view-only").removeClass("d-none");
+        $("#view-edit-session").removeClass("d-none");
         $(".flashcard-current .flashcard-front").removeClass("d-none");
         $(".flashcard-current .flashcard-back").addClass("d-none");
 
@@ -80,8 +80,8 @@ function showStartScreen() {
     $(".customized-navbar").removeClass("normal-bottom-margin");
     $(".customized-navbar").addClass("large-bottom-margin");
 
-    $(".current-word-container.view-only").addClass("d-none");
-    $(".current-word-container.edit").addClass("d-none");
+    $("#view-edit-session").addClass("d-none");
+    $(".edit").addClass("d-none");
 
     $(".search").removeClass("normal-bottom-margin");
     $(".search").addClass("medium-bottom-margin");
@@ -124,8 +124,8 @@ function exitEditMode() {
 function enterEditMode(flashcard) {
     isEditing = true;
 
-    $(".current-word-container.view-only").addClass("d-none");
-    $(".current-word-container.edit").removeClass("d-none");
+    $("#view-edit-session").addClass("d-none");
+    $(".edit").removeClass("d-none");
 
     resetEditModeUI();
 
