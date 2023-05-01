@@ -22,7 +22,7 @@ const flashCardSchema = mongoose.Schema({
     }
 });
 
-const flashcardSetMetaData = mongoose.Schema({
+const flashcardSetMetaDataSchema = mongoose.Schema({
     flashcardSetName: {
         type: String,
         required: true
@@ -253,18 +253,22 @@ async function addCategory(collectionName, category) {
 
         modelName += 'FlashcardSetMetaData';
 
-        const dbFlashcardSetMetaData = mongoose.model(modelName, flashcardSetMetaData);
+        const dbFlashcardSetMetaData = mongoose.model(modelName, flashcardSetMetaDataSchema);
 
         let result = await dbFlashcardSetMetaData
-                            .find({flashcardSetName: collectionName})
-                            .select(["categoryList"]);
+                            .findOne({flashcardSetName: collectionName});
 
         if (null === result) {
-            throw new Error(`${collectionName} doesn't have meta data yet.`);
+            result = new dbFlashcardSetMetaData({
+                flashcardSetName: collectionName,
+                categoryList: [],
+                wordTypeList: []
+            });
         }
-        if (!result.includes(category)) {
-            result.push(category);
+        if (!result.categoryList.includes(category)) {
+            result.categoryList.push(category);
         }
+        await result.save();
     } catch (err) {
         throw new Error(`${err}`);
     }
@@ -278,19 +282,47 @@ async function getCategories(collectionName) {
 
         modelName += 'FlashcardSetMetaData';
 
-        const dbFlashcardSetMetaData = mongoose.model(modelName, flashcardSetMetaData);
+        const dbFlashcardSetMetaData = mongoose.model(modelName, flashcardSetMetaDataSchema);
 
         let result = await dbFlashcardSetMetaData
-                            .find({flashcardSetName: collectionName})
-                            .select(["categoryList"]);
+                            .findOne({flashcardSetName: collectionName})
+                            .select(["categoryList","-_id"]);
 
         if (null === result) {
             throw new Error(`${collectionName} doesn't have meta data yet.`);
         }
-        
-        return result;
+        return result.categoryList;
     } catch (err) {
         throw new Error(`${err}`);
+    }
+}
+
+async function deleteCategory(collectionName, categoryName) {
+    try {
+        await mongoose.connect(uri);
+
+        let modelName = convertCollectionNameToMongooseModelName(collectionName);
+
+        modelName += 'FlashcardSetMetaData';
+
+        const dbFlashcardSetMetaData = mongoose.model(modelName, flashcardSetMetaDataSchema);
+
+        let flashcardSetMetaData = await dbFlashcardSetMetaData
+                            .findOne({flashcardSetName: collectionName});
+
+        if (null === flashcardSetMetaData) {
+            throw new Error(`${collectionName} doesn't have meta data yet.`);
+        }
+
+        let tempArray = flashcardSetMetaData.categoryList
+                                .filter(function(category) {
+                                    return category !== categoryName;
+                                });
+        flashcardSetMetaData.categoryList = tempArray.filter(e => e); //filter empty string
+
+        await flashcardSetMetaData.save();
+    } catch (err) {
+        throw new Error(err);
     }
 }
 
@@ -302,4 +334,5 @@ exports.updateFlashcard = updateFlashcard;
 exports.deleteFlashcard = deleteFlashcard;
 exports.addCategory = addCategory;
 exports.getCategories = getCategories;
+exports.deleteCategory = deleteCategory;
 //exports.getRandomFlashcards = getRandomFlashcards;

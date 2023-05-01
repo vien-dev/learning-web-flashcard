@@ -1,26 +1,26 @@
-let currentFlashCard = {};
+let currentFlashcard = {};
 let isEditing = false;
 
 function queryWord(filter) {
     fetch('/ajax/flashcard?' + new URLSearchParams(filter))
     .then(response => response.json())
-    .then(function(queriedFlashCardData) {
-        showFlashcardUI(queriedFlashCardData)
+    .then(function(queriedFlashcardData) {
+        showFlashcardUI(queriedFlashcardData)
     })
 }
 
 async function queryDynamicContentFromOpenAI() {
     const filter = {
-        word: currentFlashCard.word,
-        wordType: currentFlashCard.wordType
+        word: currentFlashcard.word,
+        wordType: currentFlashcard.wordType
     };
 
     let queriedOpenAIDynamicContent = await fetch('/ajax/dynamic-content-from-openai?' + new URLSearchParams(filter))
     .then(response => response.json());
-    updateFlashCardDynamicContentFromOpenAI(queriedOpenAIDynamicContent);
+    updateFlashcardDynamicContentFromOpenAI(queriedOpenAIDynamicContent);
 }
 
-function updateFlashCardDynamicContentFromOpenAI(dynamicContentFromOpenAI) {
+function updateFlashcardDynamicContentFromOpenAI(dynamicContentFromOpenAI) {
     if (dynamicContentFromOpenAI.flashcardImage != "") {
         $(".flashcard-image").attr("src", dynamicContentFromOpenAI.flashcardImage);
     }
@@ -28,7 +28,7 @@ function updateFlashCardDynamicContentFromOpenAI(dynamicContentFromOpenAI) {
 
 function showFlashcardUI(flashcard) {
     if (!jQuery.isEmptyObject(flashcard)) {
-        currentFlashCard = flashcard;
+        currentFlashcard = flashcard;
         $(".customized-navbar").removeClass("large-bottom-margin");
         $(".customized-navbar").addClass("normal-bottom-margin");
 
@@ -71,8 +71,8 @@ function showFlashcardUI(flashcard) {
 
         queryDynamicContentFromOpenAI();
     } else {
-        currentFlashCard = {};
-        enterEditMode(currentFlashCard);
+        currentFlashcard = {};
+        enterEditMode(currentFlashcard);
     }
 }
 
@@ -143,6 +143,8 @@ function enterEditMode(flashcard) {
     } else {
         $("#btnRemoveWord").addClass("d-none");
     }
+
+    queryFlashcardSetMetaData();
 }
 
 function editModeAddExtraInfo(extraInfo) {
@@ -181,10 +183,24 @@ function editModeAddExtraInfo(extraInfo) {
     }
 }
 
+function editModeUpdateFlashcardMetaData(flashcardMetaData) {
+    $("#flashcard-categories").html("");
+    flashcardMetaData.categories.forEach(function(category) {
+        $("#flashcard-categories").append(`<option value="${category}">`);
+    });
+}
+
+async function queryFlashcardSetMetaData() {
+    let queriedFlashcardMetaData = await fetch('/ajax/flashcard-meta-data')
+    .then(response => response.json());
+
+    editModeUpdateFlashcardMetaData(queriedFlashcardMetaData);
+}
+
 $("#btnAddExtraInfo").click(function() {editModeAddExtraInfo("")});
 
 $("#btnEditWord").click(function() {
-    enterEditMode(currentFlashCard);
+    enterEditMode(currentFlashcard);
 });
 
 $("#btnSubmitEditWord").click(function() {
@@ -210,11 +226,11 @@ $("#btnSubmitEditWord").click(function() {
 
     let methodInUse="POST";
     let filterInUse={};
-    if (!jQuery.isEmptyObject(currentFlashCard)) {
+    if (!jQuery.isEmptyObject(currentFlashcard)) {
         methodInUse="PUT";
         filterInUse={
-            word: currentFlashCard.word,
-            wordType: currentFlashCard.wordType
+            word: currentFlashcard.word,
+            wordType: currentFlashcard.wordType
         }
     }
     const flashcardInEdit = {
@@ -258,9 +274,9 @@ $("#btnRemoveWord").click(function() {
     //use delete method
     //if server response is ok exit edit mode.
     //else. Stay
-    if (!jQuery.isEmptyObject(currentFlashCard)) {
-        const wordInConcern = currentFlashCard.word;
-        const wordTypeInConcern = currentFlashCard.wordType;
+    if (!jQuery.isEmptyObject(currentFlashcard)) {
+        const wordInConcern = currentFlashcard.word;
+        const wordTypeInConcern = currentFlashcard.wordType;
         const methodInUse = "DELETE";
         const filter = {
             word: wordInConcern,

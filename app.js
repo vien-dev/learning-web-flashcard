@@ -47,7 +47,6 @@ app.get("/ajax/flashcard", async function(req, res) {
 });
 
 app.post("/ajax/flashcard", bodyParser.json({type: 'application/json'}), async function(req, res) {
-  console.log(req.body);
   const receivedFlashcard = req.body.flashcard;
   const flashcardInEdit = new flashcardDBAdapter.Flashcard(
     word =  receivedFlashcard.word,
@@ -61,6 +60,7 @@ app.post("/ajax/flashcard", bodyParser.json({type: 'application/json'}), async f
 
   try {
     await flashcardDBAdapter.addFlashcard(swedishFlashcardCollectionName, flashcardInEdit)
+    await flashcardDBAdapter.addCategory(swedishFlashcardCollectionName, receivedFlashcard.category);
     res.json({status: "ok"});
   } catch(err) {
     console.log(err);
@@ -83,7 +83,20 @@ app.put("/ajax/flashcard", bodyParser.json({type: 'application/json'}), async fu
       example = flashcardInEdit.flashcard.example,
       lastRead = Date.now()
     );
+    let oldFlashcards = await flashcardDBAdapter.getFlashcards(swedishFlashcardCollectionName, flashcardFilter);
     await flashcardDBAdapter.updateFlashcard(swedishFlashcardCollectionName, flashcardFilter, updatedFlashcard);
+    if (flashcardInEdit.flashcard.category) {
+        await flashcardDBAdapter.addCategory(swedishFlashcardCollectionName, flashcardInEdit.flashcard.category);
+    }
+    
+    let oldFlashcard = oldFlashcards[0];
+    try {
+        let categoryFilter = new flashcardDBAdapter.FlashcardFilter({category: oldFlashcard.category});
+        await flashcardDBAdapter.getFlashcards(swedishFlashcardCollectionName, categoryFilter);
+    } catch(err) {
+        //no flashcards found for category, remove the category from meta data collection
+        await flashcardDBAdapter.deleteCategory(swedishFlashcardCollectionName, oldFlashcard.category);
+    }
     res.json({status: "ok"});
   } catch(err) {
     console.log(err);
@@ -106,6 +119,20 @@ app.delete("/ajax/flashcard", bodyParser.json({type: 'application/json'}), async
     console.log(err);
     res.status(500).json({status: "nok", error: err});
   }
+});
+
+app.get("/ajax/flashcard-meta-data", async function(req, res) {
+    try {
+      const categories = await flashcardDBAdapter.getCategories(swedishFlashcardCollectionName);
+      res.json({categories: categories,
+                wordTypes: []
+                });
+    } catch(err) {
+      console.log(err);
+      res.json({categories: [],
+                wordTypes: []
+                });
+    };
 });
 
 app.get("/ajax/dynamic-content-from-openai", async function(req, res) {
@@ -133,7 +160,6 @@ app.get("/ajax/dynamic-content-from-openai", async function(req, res) {
 
     for (current_prompt of prompts) {
       try {
-        console.log(current_prompt);
         let openAIResponse = await fetch("https://api.openai.com/v1/images/generations", {
           method: "POST",
           headers: {
@@ -149,7 +175,6 @@ app.get("/ajax/dynamic-content-from-openai", async function(req, res) {
         })
         .then(result => result.json());
         
-        console.log(openAIResponse);
         responseJSON.flashcardImage = openAIResponse.data[0].url;
         res.json(responseJSON);
         
