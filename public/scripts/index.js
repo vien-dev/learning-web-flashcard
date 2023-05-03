@@ -188,6 +188,11 @@ function editModeUpdateFlashcardMetaData(flashcardMetaData) {
     flashcardMetaData.categories.forEach(function(category) {
         $("#flashcard-categories").append(`<option value="${category}">`);
     });
+
+    $("#flashcard-word-types").html("");
+    flashcardMetaData.wordTypes.forEach(function(wordType) {
+        $("#flashcard-word-types").append(`<option value="${wordType}">`);
+    });
 }
 
 async function queryFlashcardSetMetaData() {

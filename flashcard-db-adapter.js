@@ -245,7 +245,7 @@ async function deleteFlashcard(collectionName, flashcardFilter) {
     }
 }
 
-async function addCategory(collectionName, category) {
+async function addMetaData(collectionName, metaDataType, metaDataName) {
     try {
         await mongoose.connect(uri);
 
@@ -265,16 +265,20 @@ async function addCategory(collectionName, category) {
                 wordTypeList: []
             });
         }
-        if (!result.categoryList.includes(category)) {
-            result.categoryList.push(category);
+
+        if ("category-list" === metaDataType && !result.categoryList.includes(metaDataName)) {
+            result.categoryList.push(metaDataName);
+        } else if ("word-type-list" === metaDataType && !result.wordTypeList.includes(metaDataName)) {
+            result.wordTypeList.push(metaDataName);
         }
+
         await result.save();
     } catch (err) {
         throw new Error(`${err}`);
     }
 }
 
-async function getCategories(collectionName) {
+async function getMetaData(collectionName, metaDataType) {
     try {
         await mongoose.connect(uri);
 
@@ -286,18 +290,26 @@ async function getCategories(collectionName) {
 
         let result = await dbFlashcardSetMetaData
                             .findOne({flashcardSetName: collectionName})
-                            .select(["categoryList","-_id"]);
+                            .select(["-_id"]);
 
         if (null === result) {
             throw new Error(`${collectionName} doesn't have meta data yet.`);
         }
-        return result.categoryList;
+
+        if ("category-list" === metaDataType) {
+            return result.categoryList;
+        } else if ("word-type-list" === metaDataType) {
+            return result.wordTypeList;
+        } else {
+            throw new Error(`Unknown meta data type ${metaDataType}`);
+        }
+
     } catch (err) {
         throw new Error(`${err}`);
     }
 }
 
-async function deleteCategory(collectionName, categoryName) {
+async function deleteMetaData(collectionName, metaDataType, metaDataName) {
     try {
         await mongoose.connect(uri);
 
@@ -314,14 +326,74 @@ async function deleteCategory(collectionName, categoryName) {
             throw new Error(`${collectionName} doesn't have meta data yet.`);
         }
 
-        let tempArray = flashcardSetMetaData.categoryList
-                                .filter(function(category) {
-                                    return category !== categoryName;
-                                });
-        flashcardSetMetaData.categoryList = tempArray.filter(e => e); //filter empty string
+        if ("category-list" === metaDataType) {
+            let tempArray = flashcardSetMetaData.categoryList
+                                    .filter(function(category) {
+                                        return category !== metaDataName;
+                                    });
+            flashcardSetMetaData.categoryList = tempArray.filter(e => e); //filter empty string
+        } else if  ("word-type-list" === metaDataType) {
+            let tempArray = flashcardSetMetaData.wordTypeList
+                                    .filter(function(wordType) {
+                                        return wordType !== metaDataName;
+                                    });
+            flashcardSetMetaData.wordTypeList = tempArray.filter(e => e); //filter empty string
+        }
 
         await flashcardSetMetaData.save();
     } catch (err) {
+        throw new Error(err);
+    }
+}
+
+async function addCategory(collectionName, categoryName) {
+    try {
+        await addMetaData(collectionName, metaDataType = "category-list", metaDataName = categoryName);
+    } catch(err) {
+        throw new Error(err);
+    }
+}
+
+async function addWordType(collectionName, wordTypeName) {
+    try {
+        await addMetaData(collectionName, metaDataType = "word-type-list", metaDataName = wordTypeName);
+    } catch(err) {
+        throw new Error(err);
+    }
+}
+
+async function getCategories(collectionName) {
+    try {
+        return await getMetaData(collectionName, metaDataName = "category-list");
+    } catch(err) {
+        throw new Error(err);
+    }
+}
+
+async function getWordTypes(collectionName) {
+    try {
+        return await getMetaData(collectionName, metaDataName = "word-type-list");
+    } catch(err) {
+        throw new Error(err);
+    }
+}
+
+async function deleteCategory(collectionName, categoryName) {
+    try {
+        await deleteMetaData(collectionName, 
+                            metaDataType = "category-list", 
+                            metaDataName = categoryName);
+    } catch(err) {
+        throw new Error(err);
+    }
+}
+
+async function deleteWordType(collectionName, wordTypeName) {
+    try {
+        await deleteMetaData(collectionName, 
+                            metaDataType = "word-type-list", 
+                            metaDataName = wordTypeName);
+    } catch(err) {
         throw new Error(err);
     }
 }
@@ -335,4 +407,7 @@ exports.deleteFlashcard = deleteFlashcard;
 exports.addCategory = addCategory;
 exports.getCategories = getCategories;
 exports.deleteCategory = deleteCategory;
+exports.addWordType = addWordType;
+exports.getWordTypes = getWordTypes;
+exports.deleteWordType = deleteWordType;
 //exports.getRandomFlashcards = getRandomFlashcards;

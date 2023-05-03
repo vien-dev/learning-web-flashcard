@@ -61,6 +61,7 @@ app.post("/ajax/flashcard", bodyParser.json({type: 'application/json'}), async f
   try {
     await flashcardDBAdapter.addFlashcard(swedishFlashcardCollectionName, flashcardInEdit)
     await flashcardDBAdapter.addCategory(swedishFlashcardCollectionName, receivedFlashcard.category);
+    await flashcardDBAdapter.addWordType(swedishFlashcardCollectionName, receivedFlashcard.wordType);
     res.json({status: "ok"});
   } catch(err) {
     console.log(err);
@@ -83,19 +84,32 @@ app.put("/ajax/flashcard", bodyParser.json({type: 'application/json'}), async fu
       example = flashcardInEdit.flashcard.example,
       lastRead = Date.now()
     );
+
     let oldFlashcards = await flashcardDBAdapter.getFlashcards(swedishFlashcardCollectionName, flashcardFilter);
+    let oldFlashcard = oldFlashcards[0];
+
     await flashcardDBAdapter.updateFlashcard(swedishFlashcardCollectionName, flashcardFilter, updatedFlashcard);
+
     if (flashcardInEdit.flashcard.category) {
         await flashcardDBAdapter.addCategory(swedishFlashcardCollectionName, flashcardInEdit.flashcard.category);
     }
+    if (flashcardInEdit.flashcard.wordType) {
+        await flashcardDBAdapter.addWordType(swedishFlashcardCollectionName, flashcardInEdit.flashcard.wordType);
+    }
     
-    let oldFlashcard = oldFlashcards[0];
     try {
         let categoryFilter = new flashcardDBAdapter.FlashcardFilter({category: oldFlashcard.category});
         await flashcardDBAdapter.getFlashcards(swedishFlashcardCollectionName, categoryFilter);
     } catch(err) {
         //no flashcards found for category, remove the category from meta data collection
         await flashcardDBAdapter.deleteCategory(swedishFlashcardCollectionName, oldFlashcard.category);
+    }
+    try {
+        let wordTypeFilter = new flashcardDBAdapter.FlashcardFilter({wordType: oldFlashcard.wordType});
+        await flashcardDBAdapter.getFlashcards(swedishFlashcardCollectionName, wordTypeFilter);
+    } catch(err) {
+        //no flashcards found for word type, remove the word type from meta data collection
+        await flashcardDBAdapter.deleteWordType(swedishFlashcardCollectionName, oldFlashcard.wordType);
     }
     res.json({status: "ok"});
   } catch(err) {
@@ -124,8 +138,9 @@ app.delete("/ajax/flashcard", bodyParser.json({type: 'application/json'}), async
 app.get("/ajax/flashcard-meta-data", async function(req, res) {
     try {
       const categories = await flashcardDBAdapter.getCategories(swedishFlashcardCollectionName);
+      const wordTypes = await flashcardDBAdapter.getWordTypes(swedishFlashcardCollectionName);
       res.json({categories: categories,
-                wordTypes: []
+                wordTypes: wordTypes
                 });
     } catch(err) {
       console.log(err);

@@ -50,7 +50,8 @@
                     </div>
                     <div class="row">
                         <label class="col-4 text-end" for="inputWordTypeInEdit">Word Type: </label>
-                        <input class="col-8" type="text" name="wordTypeInEdit" id="inputWordTypeInEdit">
+                        <input class="col-8" list="flashcard-word-types" name="wordTypeInEdit" id="inputWordTypeInEdit">
+                        <datalist id="flashcard-word-types"></datalist>
                     </div>
                     <div class="row extra-info-header">
                         <p class="col-4 text-end">Extra Info: </p>
@@ -95,7 +96,7 @@
 <div id="carouselExampleControls" class="carousel slide medium-bottom-margin" data-bs-interval="false">
     <div class="carousel-inner" role="listbox">
         <div class="container">
-            <% homeEJSTopPickFlashcards.forEach(function(flashCard, idx, arr) { %>
+            <% homeEJSTopPickFlashcards.forEach(function(flashcard, idx, arr) { %>
                 <% if (idx % 3 === 0) { %>
                     <% if (0 === idx) { %>
                         <div class="carousel-item active">
@@ -107,10 +108,10 @@
                                 <div class="col-md-4">
                                     <div class="flashcard">
                                         <div class="flashcard-side flashcard-front">
-                                            <% if (flashCard.wordType != '') { %>
-                                            <p><span class="flashcard-word"><%= flashCard.word %></span> <span class="flashcard-word-type">(<%= flashCard.wordType %>)</span></p>
+                                            <% if (flashcard.wordType != '') { %>
+                                            <p><span class="flashcard-word"><%= flashcard.word %></span> <span class="flashcard-word-type">(<%= flashcard.wordType %>)</span></p>
                                             <% } else { %>
-                                            <p><span class="flashcard-word"><%= flashCard.word %></span></p>
+                                            <p><span class="flashcard-word"><%= flashcard.word %></span></p>
                                             <% } %>
                                         </div>
                                     </div>
