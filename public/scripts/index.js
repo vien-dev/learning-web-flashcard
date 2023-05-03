@@ -9,15 +9,35 @@ function queryWord(filter) {
     })
 }
 
+let openAIFetchAbortController = null;
 async function queryDynamicContentFromOpenAI() {
+    if (null === openAIFetchAbortController) {
+        openAIFetchAbortController = new AbortController();
+    } else {
+        if (false === openAIFetchAbortController.signal.aborted) {
+            openAIFetchAbortController.abort();
+
+            openAIFetchAbortController = new AbortController();
+        }
+    }
+
     const filter = {
         word: currentFlashcard.word,
         wordType: currentFlashcard.wordType
     };
 
-    let queriedOpenAIDynamicContent = await fetch('/ajax/dynamic-content-from-openai?' + new URLSearchParams(filter))
-    .then(response => response.json());
-    updateFlashcardDynamicContentFromOpenAI(queriedOpenAIDynamicContent);
+    let queriedOpenAIDynamicContent = {};
+    queriedOpenAIDynamicContent = await fetch('/ajax/dynamic-content-from-openai?' 
+                                                + new URLSearchParams(filter),
+                                            {signal : openAIFetchAbortController.signal})
+                                            .then(response => response.json())
+                                            .catch(function(err) {
+                                                console.log(err);
+                                            });
+    
+    if (!jQuery.isEmptyObject(queriedOpenAIDynamicContent)) {
+        updateFlashcardDynamicContentFromOpenAI(queriedOpenAIDynamicContent);
+    }
 }
 
 function updateFlashcardDynamicContentFromOpenAI(dynamicContentFromOpenAI) {

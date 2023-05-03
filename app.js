@@ -150,64 +150,81 @@ app.get("/ajax/flashcard-meta-data", async function(req, res) {
     };
 });
 
+let openAIAbortController = null;
 app.get("/ajax/dynamic-content-from-openai", async function(req, res) {
-  let wordInConcern = req.query.word;
-  let wordTypeInConcern = req.query.wordType;
+    if (null === openAIAbortController) {
+        openAIAbortController = new AbortController();
+    } else {
+        if (false === openAIAbortController.signal.aborted) {
+            openAIAbortController.abort();
 
-  let responseJSON = {
-    flashcardImage: ""
-  }
-
-  try {
-    const filter = new flashcardDBAdapter.FlashcardFilter({
-                                              word: wordInConcern, 
-                                              wordType: wordTypeInConcern,
-                                              limit: 1});
-    const result = await flashcardDBAdapter.getFlashcards(swedishFlashcardCollectionName, filter);
-    
-    let foundedCard = result[0];
-
-    let prompts = [
-      foundedCard.example,
-      foundedCard.definition,
-      `Skapa en bild för begreppet "${foundedCard.word}".`
-    ];
-
-    for (current_prompt of prompts) {
-      try {
-        let openAIResponse = await fetch("https://api.openai.com/v1/images/generations", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
-          },
-          body: JSON.stringify({
-            prompt: current_prompt,
-            n: 1,
-            size: "256x256",
-            response_format: "url"
-          })
-        })
-        .then(result => result.json());
-        
-        responseJSON.flashcardImage = openAIResponse.data[0].url;
-        res.json(responseJSON);
-        
-        break;
-      } catch(error) {
-        console.log(`Failed to generate image for promt ${current_prompt}`);
-        if (error.response) {
-          console.log(error.response.status);
-          console.log(error.response.data);
-        } else {
-          console.log(error.message);
+            openAIAbortController = new AbortController();
         }
-      }
-    }  
-  } catch(err) {
-    console.log(`Cannot generate image because of error ${err}`);
-    res.json(responseJSON);
-  };
+    }
+
+    let wordInConcern = req.query.word;
+    let wordTypeInConcern = req.query.wordType;
+
+    let responseJSON = {
+        flashcardImage: ""
+    }
+
+    try {
+        const filter = new flashcardDBAdapter.FlashcardFilter({
+                                                word: wordInConcern, 
+                                                wordType: wordTypeInConcern,
+                                                limit: 1});
+        const result = await flashcardDBAdapter.getFlashcards(swedishFlashcardCollectionName, filter);
+        
+        let foundedCard = result[0];
+
+        let prompts = [
+        foundedCard.example,
+        foundedCard.definition,
+        `Skapa en bild för begreppet "${foundedCard.word}".`
+        ];
+
+        for (current_prompt of prompts) {
+        try {
+            let openAIResponse = {};
+            openAIResponse = await fetch("https://api.openai.com/v1/images/generations", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+            },
+            body: JSON.stringify({
+                prompt: current_prompt,
+                n: 1,
+                size: "256x256",
+                response_format: "url"
+            })
+            },
+            {signal: openAIAbortController.signal})
+            .then(result => result.json());
+            
+            //in case the request is aborted, the response will be empty.
+            if (Object.keys(openAIResponse).length !== 0) {
+                responseJSON.flashcardImage = openAIResponse.data[0].url;
+            }
+
+            res.json(responseJSON);
+            
+            break;
+        } catch(error) {
+            console.log(`Failed to generate image for promt ${current_prompt}`);
+            if (error.response) {
+            console.log(error.response.status);
+            console.log(error.response.data);
+            } else {
+            console.log(error.message);
+            }
+        }
+        }  
+    } catch(err) {
+        console.log(`Cannot generate image because of error ${err}`);
+        res.json(responseJSON);
+    };
 
 });
 
