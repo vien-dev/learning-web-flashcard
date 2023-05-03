@@ -52,6 +52,7 @@ body {
 .flashcard-front {
     background-color: #FFFFFF;
     color: #90A4AE;
+    padding-top: 5%;
 }
 
 .flashcard-current,
