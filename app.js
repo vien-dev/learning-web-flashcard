@@ -204,8 +204,10 @@ app.get("/ajax/dynamic-content-from-openai", async function(req, res) {
             .then(result => result.json());
             
             //in case the request is aborted, the response will be empty.
-            if (Object.keys(openAIResponse).length !== 0) {
+            if (Object.keys(openAIResponse).length !== 0 && openAIResponse.data) {
                 responseJSON.flashcardImage = openAIResponse.data[0].url;
+            } else {
+                console.log(openAIResponse);
             }
 
             res.json(responseJSON);
@@ -213,6 +215,7 @@ app.get("/ajax/dynamic-content-from-openai", async function(req, res) {
             break;
         } catch(error) {
             console.log(`Failed to generate image for promt ${current_prompt}`);
+            console.log(error);
             if (error.response) {
             console.log(error.response.status);
             console.log(error.response.data);
