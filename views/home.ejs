@@ -1,4 +1,11 @@
+<!DOCTYPE html>
+<html lang="en">
 <%- include("partials/header"); -%>  
+<body>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <%- include("partials/navbar"); -%>
+
 <div class="input-group search medium-bottom-margin">
     <input class="form-control border-0 rounded-left" type="text" placeholder="Search for a word">
     <span class="input-group-append">
@@ -133,4 +140,8 @@
     </button>
 </div>
 
-<%- include("partials/footer"); -%>  
+<%- include("partials/footer"); -%> 
+
+<script type="module" src="/scripts/home.js"></script>
+</body>
+</html>

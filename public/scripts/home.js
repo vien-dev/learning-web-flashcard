@@ -1,3 +1,5 @@
+import {queryFlashcardSetMetaData} from './common.mjs'
+
 let currentFlashcard = {};
 let isEditing = false;
 
@@ -141,7 +143,7 @@ function exitEditMode() {
     showStartScreen();
 }
 
-function enterEditMode(flashcard) {
+async function enterEditMode(flashcard) {
     isEditing = true;
 
     $("#view-section").addClass("d-none");
@@ -164,7 +166,8 @@ function enterEditMode(flashcard) {
         $("#btnRemoveWord").addClass("d-none");
     }
 
-    queryFlashcardSetMetaData();
+    let queriedFlashcardMetaData = await queryFlashcardSetMetaData();
+    editModeUpdateFlashcardMetaData(queriedFlashcardMetaData);
 }
 
 function editModeAddExtraInfo(extraInfo) {
@@ -213,13 +216,6 @@ function editModeUpdateFlashcardMetaData(flashcardMetaData) {
     flashcardMetaData.wordTypes.forEach(function(wordType) {
         $("#flashcard-word-types").append(`<option value="${wordType}">`);
     });
-}
-
-async function queryFlashcardSetMetaData() {
-    let queriedFlashcardMetaData = await fetch('/ajax/flashcard-meta-data')
-    .then(response => response.json());
-
-    editModeUpdateFlashcardMetaData(queriedFlashcardMetaData);
 }
 
 $("#btnAddExtraInfo").click(function() {editModeAddExtraInfo("")});

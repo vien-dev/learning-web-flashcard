@@ -105,6 +105,7 @@ class FlashcardFilter {
             this.dbFilter.lastRead = lastRead;
         }
         this.limit = limit;
+        this.withoutOrder = withoutOrder;
     }
 };
 
@@ -140,6 +141,17 @@ async function addFlashcard(collectionName, flashcard) {
     }
 }
 
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const temp = array[i];
+      array[i] = array[j];
+      array[j] = temp;
+    }
+
+    return array;
+}
+
 //read
 //read by word
 // input: flashcard word, flashcard wordType
@@ -152,9 +164,19 @@ async function getFlashcards(collectionName, flashcardFilter = new FlashcardFilt
 
         const dbFlashcard = mongoose.model(modelName, flashCardSchema);
 
-        const dbFlashcards = await dbFlashcard.find(flashcardFilter.dbFilter)
-                                            .limit(flashcardFilter.limit)
-                                            .select(["-_id"]);
+        let dbFlashcards = [];
+        if (flashcardFilter.withoutOrder !== true) {
+            dbFlashcards = await dbFlashcard.find(flashcardFilter.dbFilter)
+                                                .limit(flashcardFilter.limit)
+                                                .select(["-_id"]);
+        } else {
+            dbFlashcards = await dbFlashcard.find(flashcardFilter.dbFilter).select(["-_id"]);
+            dbFlashcards = shuffleArray(dbFlashcards);
+
+            if (flashcardFilter.limit !== 0) {
+                dbFlashcards = dbFlashcards.slice(0, flashcardFilter.limit);
+            }
+        }
 
         if (0 === dbFlashcards.length) {
             throw new Error("No match in DB");

@@ -239,6 +239,29 @@ app.get("/game", function(req, res) {
     res.render("game");
 });
 
+app.get("/ajax/flashcards", bodyParser.json({type: 'application/json'}), async function(req, res) {
+    try {
+        let filter = {};
+        if (req.query.hasOwnProperty('category') && req.query.category !== "All" ) {
+            filter.category = req.query.category;
+        }
+        if (req.query.hasOwnProperty('amount') && req.query.amount !== 0 ) {
+            filter.limit = req.query.amount;
+            filter.limit = parseInt(filter.limit, 10);
+        }
+        filter.withoutOrder = true;
+
+        const flashcardFilter = new flashcardDBAdapter.FlashcardFilter(filter);
+        const flashcards = await flashcardDBAdapter.getFlashcards(swedishFlashcardCollectionName, 
+                                                                  flashcardFilter);
+
+        res.json(flashcards);
+      } catch(err) {
+        console.log(err);
+        res.json([]);
+      };
+});
+
 app.get("*", function(req, res) {
     res.status(404).send("Page not found!!!");
 })

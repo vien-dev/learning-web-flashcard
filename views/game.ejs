@@ -1,3 +1,76 @@
-<%- include("partials/header"); -%>
+<!DOCTYPE html>
+<html lang="en">
 
-<%- include("partials/footer"); -%>  
+<%- include("partials/header"); -%>  
+
+<body>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/game.css">
+
+    <%- include("partials/navbar"); -%>
+    <div id="game-selection-view" class="container-fluid">
+        <div class="mx-auto">
+            <div class="row justify-content-center mb-1">
+                <label class="col-5 col-md-3 text-end" for="inputCategoryForGame">Category: </label>
+                <input class="col-6 col-md-3" list="flashcard-categories" name="categoryInEdit" id="inputCategoryForGame" placeholder="Default: All">
+                <datalist id="flashcard-categories">
+                </datalist>
+            </div>
+            <div class="row justify-content-center mb-3">
+                <label class="col-5 col-md-3 text-end" for="inputFlashcardAmountForGame">Number of Flashcards: </label>
+                <input class="col-6 col-md-3" list="flashcard-amount" name="categoryInEdit" id="inputFlashcardAmountForGame" placeholder="Default: All">
+                <datalist id="flashcard-amount">
+                    <option value="All"></option>
+                    <option value="10"></option>
+                    <option value="20"></option>
+                    <option value="30"></option>
+                </datalist>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-3">
+                    <button id="btn-start-game" class="btn btn-info" type="button">
+                        Start <i class="bi bi-controller"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="in-game-view" class="d-none">
+        <div id="in-game-status" class="d-flex mb-2 mb-md-4">
+            <p id="in-game-progress" class="ms-2 d-inline-block">Progress 0/0</p>
+            <button id="btn-in-game-hint" class="btn btn-info ms-auto me-2" type="button">
+                <span>Hint(3 left)</span> <i class="bi bi-lightbulb"></i>
+            </button>
+        </div>
+        <div id="in-game-main">
+            <!-- Word description -->
+            <div>
+                <p id="word-description"></p>
+            </div>
+
+            <!-- Empty word to fill in-->
+            <div id="word-to-fill">
+
+            </div>
+
+            <!-- Unorder characters of the word -->
+            <div id="given-characters">
+
+            </div>
+        </div>
+    </div>
+
+    <div id="info" class="d-none">
+        <p></p>
+        <button class="btn btn-info" type="button">
+            New Game
+        </button>
+    </div>
+
+    <%- include("partials/footer"); -%>
+    <script type="module" src="/scripts/game.js"></script>
+</body>
+
+</html>
