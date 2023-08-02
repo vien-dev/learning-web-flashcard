@@ -1,0 +1,1 @@
+const authMiddleware = require(__dirname + "/auth-service.js");

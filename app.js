@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const flashcardDBAdapter = require(__dirname + "/flashcard-db-adapter.js");
+const authMiddleware = require(__dirname + "/auth-middleware.js");
 
 const app = express();
 
