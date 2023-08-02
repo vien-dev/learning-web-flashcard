@@ -17,7 +17,8 @@ if ('PORT' in process.env) {
 
 app.get("/", async function(req, res) {
     try {
-      let topPickFlashcards = await flashcardDBAdapter.getFlashcards(swedishFlashcardCollectionName);
+      const flashcardFilter = new flashcardDBAdapter.FlashcardFilter({withoutOrder: true});
+      let topPickFlashcards = await flashcardDBAdapter.getFlashcards(swedishFlashcardCollectionName, flashcardFilter);
       res.render("home", {
           homeEJSTopPickFlashcards: topPickFlashcards
       });

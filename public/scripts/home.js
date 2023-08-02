@@ -80,7 +80,9 @@ function showFlashcardUI(flashcard) {
         }
 
         $(".flashcard-current .flashcard-image").attr("src", "/images/flashcard_placeholder.png");
-        $(".flashcard-current .flashcard-word-definition").text(`${flashcard.definition}`);
+        let sentences = flashcard.definition.split("\n");
+        let definition = sentences.reduce((accumulator, currentValue) => accumulator + "<br>" + currentValue, "")
+        $(".flashcard-current .flashcard-word-definition").html(`${definition}`);
         $(".flashcard-current .flashcard-word-example").text(`Ex: ${flashcard.example}`);
 
         $("#view-section").removeClass("d-none");
@@ -158,6 +160,7 @@ async function enterEditMode(flashcard) {
         flashcard.extraInfo.forEach(function(extraInfo) {
             editModeAddExtraInfo(extraInfo);
         });
+        console.log(flashcard.definition);
         $("#inputDefinitionInEdit").val(flashcard.definition);
         $("#inputExampleInEdit").val(flashcard.example);
 

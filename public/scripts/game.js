@@ -39,7 +39,9 @@ function showNextWord() {
     let flashcard = currentPlayingFlashcards[currentPlayingFlashcardIdx];
     $("#in-game-progress").text(`Progress ${currentPlayingFlashcardIdx + 1}/${currentPlayingFlashcards.length}`);
 
-    $("#word-description").text(`${flashcard.definition}`);
+    let sentences = flashcard.definition.split("\n");
+    let definition = sentences.reduce((accumulator, currentValue) => accumulator + "<br>" + currentValue, "")
+    $("#word-description").html(`${definition}`);
 
     let word = flashcard.word;
     let words = word.split(' ');
