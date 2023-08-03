@@ -83,7 +83,10 @@ function showFlashcardUI(flashcard) {
         let sentences = flashcard.definition.split("\n");
         let definition = sentences.reduce((accumulator, currentValue) => accumulator + "<br>" + currentValue, "")
         $(".flashcard-current .flashcard-word-definition").html(`${definition}`);
-        $(".flashcard-current .flashcard-word-example").text(`Ex: ${flashcard.example}`);
+
+        let converter = new showdown.Converter({simpleLineBreaks: true});
+        let exampleHTML = converter.makeHtml(flashcard.example);
+        $(".flashcard-current .flashcard-word-example").html(`${exampleHTML}`);
 
         $("#view-section").removeClass("d-none");
         $(".flashcard-current .flashcard-front").removeClass("d-none");
