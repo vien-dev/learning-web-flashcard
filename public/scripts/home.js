@@ -80,11 +80,13 @@ function showFlashcardUI(flashcard) {
         }
 
         $(".flashcard-current .flashcard-image").attr("src", "/images/flashcard_placeholder.png");
-        let sentences = flashcard.definition.split("\n");
-        let definition = sentences.reduce((accumulator, currentValue) => accumulator + "<br>" + currentValue, "")
-        $(".flashcard-current .flashcard-word-definition").html(`${definition}`);
 
         let converter = new showdown.Converter({simpleLineBreaks: true});
+
+        let definitionHTML = converter.makeHtml(flashcard.definition);
+        $(".flashcard-current .flashcard-word-definition").html(`${definitionHTML}`);
+
+        
         let exampleHTML = converter.makeHtml(flashcard.example);
         $(".flashcard-current .flashcard-word-example").html(`${exampleHTML}`);
 
