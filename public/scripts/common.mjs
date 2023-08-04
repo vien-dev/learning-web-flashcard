@@ -41,6 +41,7 @@ export function displayFlashcard(flashcard) {
     
     let exampleHTML = converter.makeHtml(flashcard.example);
     $(".flashcard-current .flashcard-word-example").html(`${exampleHTML}`);
+    hljs.highlightAll();
     
     $(".flashcard-current .flashcard-front").removeClass("d-none");
     $(".flashcard-current .flashcard-back").addClass("d-none");

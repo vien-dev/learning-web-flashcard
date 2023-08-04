@@ -128,9 +128,11 @@ footer .footer-copyright {
 .flashcard-word-definition {
     color: #2196F3; /* blue */
     font-size: fit-content;
+    width: fit-content;
 }
 
 .flashcard-word-example {
     color: #607D8B; /* blue gray */
     font-size: fit-content;
+    width: fit-content;
 }
