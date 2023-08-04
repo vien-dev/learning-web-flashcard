@@ -1,4 +1,4 @@
-import {queryFlashcardSetMetaData} from './common.mjs'
+import {displayFlashcard, queryFlashcardSetMetaData} from './common.mjs'
 
 let currentPlayingFlashcards = [];
 let currentPlayingFlashcardIdx = 0;
@@ -75,6 +75,9 @@ function showNextWord() {
     currentPlayingCharacters = shuffleArray(characters);
 
     loadUnorderedCharacters();
+
+    $("#in-game-main").removeClass("d-none");
+    $("#in-game-flashcard").addClass("d-none");
 }
 
 function loadUnorderedCharacters() {
@@ -101,13 +104,7 @@ function loadUnorderedCharacters() {
 function checkAnswer() {
     let word = currentPlayingFlashcards[currentPlayingFlashcardIdx].word;
     if (word === $(".final-answer").text()) {
-        currentPlayingFlashcardIdx++;
-
-        if (currentPlayingFlashcardIdx === currentPlayingFlashcards.length) {
-            showInfo("Congratulations! You have finished all the word(s).");
-        } else {
-            showNextWord();
-        }
+        showFlashcardInGame(currentPlayingFlashcards[currentPlayingFlashcardIdx]);
     } else {
         $(".to-be-filled-btn").text(" ");
         currentFillingCharacterIdx = 0;
@@ -144,32 +141,24 @@ function showGameSelectionView() {
     $(".customized-navbar").removeClass("normal-bottom-margin");
 }
 
+function showFlashcardInGame(flashcard) {
+    displayFlashcard(flashcard);
 
+    $("#in-game-main").addClass("d-none")
+    $("#in-game-flashcard").removeClass("d-none");
+}
 
-$(document).on("keydown", function(e) {
-    let found = false;
-    if($(".unordered-char-btn").length !== 0 ) {
-        let theCharacterElement = $(".unordered-char-btn").filter(function() {
-            return $(this).text() === e.key;
-        }).first();
+function continueGame() {
+    currentPlayingFlashcardIdx++;
 
-        if (theCharacterElement.length !== 0) {
-            $(`#to-be-filled-btn--${currentFillingCharacterIdx}`).removeClass("hinted");
-
-            let c = theCharacterElement.text();
-            $(`#to-be-filled-btn--${currentFillingCharacterIdx}`).text(c);
-            currentFillingCharacterIdx++;
-
-            theCharacterElement.remove();
-
-            if (currentFillingCharacterIdx === currentPlayingCharacters.length) {
-                checkAnswer();
-            }
-        }
+    if (currentPlayingFlashcardIdx === currentPlayingFlashcards.length) {
+        showInfo("Congratulations! You have finished all the word(s).");
+    } else {
+        showNextWord();
     }
-})
+}
 
-$("#btn-start-game").click(async function() {
+async function startGame() {
     let filter = {}
     filter.category = $("#inputCategoryForGame").val();
     if (filter.category === "") {
@@ -185,7 +174,6 @@ $("#btn-start-game").click(async function() {
     } else {
         filter.amount = parseInt(filter.amount, 10);
     }
-    console.log(filter);
 
     currentPlayingFlashcards = await getFlashcards(filter);
 
@@ -197,6 +185,10 @@ $("#btn-start-game").click(async function() {
     } else {
         showInfo("Cannot find any flashcard with the specified criteria(s).");
     }
+}
+
+$("#btn-start-game").click(async function() {
+    await startGame();
 })
 
 $("#info > button").click(function() {
@@ -218,5 +210,40 @@ $("#btn-in-game-hint").click(function() {
         alert("You have no hint left!");
     }
 });
+
+$("#btn-in-game-next").click(function() {
+    continueGame();
+})
+
+$(document).on("keydown", async function(e) {
+    let found = false;
+    if ($("#game-selection-view").hasClass("d-none") !== true) {
+        await startGame();
+    } else if ($("#in-game-main").hasClass("d-none") !== true) {
+        if($(".unordered-char-btn").length !== 0 ) {
+            let theCharacterElement = $(".unordered-char-btn").filter(function() {
+                return $(this).text() === e.key;
+            }).first();
+
+            if (theCharacterElement.length !== 0) {
+                $(`#to-be-filled-btn--${currentFillingCharacterIdx}`).removeClass("hinted");
+
+                let c = theCharacterElement.text();
+                $(`#to-be-filled-btn--${currentFillingCharacterIdx}`).text(c);
+                currentFillingCharacterIdx++;
+
+                theCharacterElement.remove();
+
+                if (currentFillingCharacterIdx === currentPlayingCharacters.length) {
+                    checkAnswer();
+                }
+            }
+        }
+    } else if ($("#in-game-flashcard").hasClass("d-none") !== true) {
+        if (e.key === "Enter") {
+            continueGame();
+        }
+    }
+})
 
 loadGameSelectionView();

@@ -9,6 +9,10 @@
 #word-to-fill {
     margin-bottom: 6%;
 }
+#in-game-flashcard {
+    padding-left: 10%;
+    padding-right: 10%;
+}
 
 .game-btn {
     width: 2rem;
@@ -28,6 +32,11 @@
     color: rgb(43, 103, 135);
 }
 
+.flashcard-current {
+    height: 220px;
+}
+
+
 @media screen and (min-width: 768px){
     #in-game-view {
         padding-left: 10%;
@@ -43,5 +52,12 @@
     .unordered-char-btn {
         width: 3.2rem;
         height: 3.2rem;
+    }
+}
+
+@media screen and (min-width: 992px){
+    #in-game-flashcard {
+        padding-left: 20%;
+        padding-right: 20%;
     }
 }
