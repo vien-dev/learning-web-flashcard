@@ -1,4 +1,4 @@
-import {displayFlashcard, queryFlashcardSetMetaData} from './common.mjs'
+import {displayFlashcard, queryFlashcardSetMetaData, queryDynamicContentFromOpenAI} from './common.mjs'
 
 let currentPlayingFlashcards = [];
 let currentPlayingFlashcardIdx = 0;
@@ -149,6 +149,8 @@ function showFlashcardInGame(flashcard) {
 
     $("#in-game-main").addClass("d-none")
     $("#in-game-flashcard").removeClass("d-none");
+
+    queryDynamicContentFromOpenAI(flashcard);
 }
 
 function continueGame() {
