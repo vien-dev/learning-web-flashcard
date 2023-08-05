@@ -61,6 +61,7 @@ function showNextWord() {
             $("#word-to-fill").append(`<button id="remove-answer" class="btn btn-danger rounded-circle game-btn" type="button"><i class="bi bi-x"></i></button>`);
             $("#remove-answer").click(function() {
                 $(".to-be-filled-btn").text(" ");
+                $(".to-be-filled-btn").removeClass("guessed");
                 currentFillingCharacterIdx = 0;
                 loadUnorderedCharacters();
             })
@@ -92,6 +93,8 @@ function loadUnorderedCharacters() {
 
         let c = e.target.innerText;
         $(`#to-be-filled-btn--${currentFillingCharacterIdx}`).text(c);
+        $(`#to-be-filled-btn--${currentFillingCharacterIdx}`).addClass("guessed");
+
         currentFillingCharacterIdx++;
         e.target.remove();
 
@@ -230,6 +233,8 @@ $(document).on("keydown", async function(e) {
 
                 let c = theCharacterElement.text();
                 $(`#to-be-filled-btn--${currentFillingCharacterIdx}`).text(c);
+                $(`#to-be-filled-btn--${currentFillingCharacterIdx}`).addClass("guessed");
+
                 currentFillingCharacterIdx++;
 
                 theCharacterElement.remove();
