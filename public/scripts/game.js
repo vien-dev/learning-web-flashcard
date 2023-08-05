@@ -223,7 +223,9 @@ $("#btn-in-game-next").click(function() {
 $(document).on("keydown", async function(e) {
     let found = false;
     if ($("#game-selection-view").hasClass("d-none") !== true) {
-        await startGame();
+        if (e.key === "Enter") {
+            await startGame();
+        }
     } else if ($("#in-game-main").hasClass("d-none") !== true) {
         if($(".unordered-char-btn").length !== 0 ) {
             let theCharacterElement = $(".unordered-char-btn").filter(function() {
